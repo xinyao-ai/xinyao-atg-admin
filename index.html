@@ -1,9 +1,31 @@
 <!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>芯瑤💕ATG 管理後台</title>
 <style>
 :root{--p:#ef4d91;--bg:#fff6fa;--line:#f2dbe6;--muted:#8b7882;--red:#e84c69}*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft JhengHei",sans-serif;background:var(--bg);color:#302830}.app{display:grid;grid-template-columns:235px 1fr;min-height:100vh}.side{background:#fff;padding:20px 14px;border-right:1px solid var(--line)}.brand{font-size:19px;font-weight:900;padding:10px}.nav{display:grid;gap:7px}.nav button{border:0;background:transparent;padding:12px;text-align:left;border-radius:12px;font-weight:800}.nav button.active{background:linear-gradient(135deg,#ff91bc,var(--p));color:#fff}.main{padding:22px}.top{display:flex;justify-content:space-between;align-items:center}.panel{display:none}.panel.active{display:block}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 10px 30px #d9548b10}.stat b{display:block;font-size:28px;margin-top:6px}.muted{font-size:12px;color:var(--muted)}.row{display:flex;gap:8px;flex-wrap:wrap}.input,select,textarea{border:1px solid var(--line);border-radius:11px;padding:10px;background:#fffafd}.btn{border:0;border-radius:11px;padding:10px 12px;font-weight:850;cursor:pointer}.primary{background:var(--p);color:#fff}.soft{background:#fff0f6;color:#d83d7d}.danger{background:var(--red);color:#fff}.table{overflow:auto;border:1px solid var(--line);border-radius:13px;margin-top:12px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:10px;border-bottom:1px solid #f6e8ee;text-align:left;font-size:13px}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.win{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}.win img{max-width:180px;max-height:130px;border-radius:9px;display:block;margin-top:8px}@media(max-width:850px){.app{grid-template-columns:1fr}.nav{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.main{padding:14px}}
-</style></head><body><div class="app"><aside class="side"><div class="brand">💕 芯瑤 ATG 後台</div><nav class="nav">
+</style>
+<style id="admin-auth-style">
+#adminLogin{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#fff7fb,#ffeaf3)}
+.loginCard{width:min(390px,100%);background:#fff;border:1px solid #f2dbe6;border-radius:24px;padding:28px;box-shadow:0 22px 70px #c93e7a22;text-align:center}
+.loginLogo{font-size:42px;margin-bottom:5px}.loginCard h2{margin:4px 0 5px}.loginCard p{margin:0 0 18px;color:#8b7882;font-size:13px}
+.loginCard input{width:100%;margin:6px 0;padding:13px;border:1px solid #f2dbe6;border-radius:13px;background:#fffafd;font-size:15px}
+.loginCard button{width:100%;margin-top:10px;padding:13px;border:0;border-radius:13px;background:linear-gradient(135deg,#ff91bc,#ef4d91);color:#fff;font-weight:900;cursor:pointer}
+#loginError{min-height:20px;margin-top:10px;color:#e84c69;font-size:12px;font-weight:800}
+#logoutBtn{display:none}
+</style>
+</head><body>
+<div id="adminLogin">
+  <div class="loginCard">
+    <div class="loginLogo">💕</div>
+    <h2>芯瑤 ATG 管理後台</h2>
+    <p>管理員登入</p>
+    <input id="adminUser" autocomplete="username" placeholder="管理員帳號">
+    <input id="adminPass" type="password" autocomplete="current-password" placeholder="管理員密碼">
+    <button onclick="adminLogin()">登入後台</button>
+    <div id="loginError"></div>
+  </div>
+</div>
+<div class="app"><aside class="side"><div class="brand">💕 芯瑤 ATG 後台</div><nav class="nav">
 <button class="active" data-tab="overview">📊 總覽</button><button data-tab="members">👥 會員管理</button><button data-tab="detail">🪪 會員詳細</button><button data-tab="kick">🚪 強制登出</button><button data-tab="batch">➕ 批次新增</button><button data-tab="wins">🎉 恭喜會員</button><button data-tab="system">🟢 系統狀態</button><button data-tab="logs">🧾 操作紀錄</button><button data-tab="activity">👀 上線／操作</button></nav></aside>
-<main class="main"><div class="top"><h2 id="title">總覽儀表板</h2><button class="btn soft" onclick="refreshAll()">↻ 更新</button></div>
+<main class="main"><div class="top"><h2 id="title">總覽儀表板</h2><div class="row"><button class="btn soft" onclick="refreshAll()">↻ 更新</button><button id="logoutBtn" class="btn danger" onclick="adminLogout()">登出</button></div></div>
 <section id="overview" class="panel active"><div class="stats"><div class="card stat"><span class="muted">會員總數</span><b id="total">—</b></div><div class="card stat"><span class="muted">正常會員</span><b id="active">—</b></div><div class="card stat"><span class="muted">停用會員</span><b id="disabled">—</b></div><div class="card stat"><span class="muted">目前上線</span><b id="online">—</b></div><div class="card stat"><span class="muted">今日新增</span><b id="today_new">—</b></div></div><div class="card"><b>最近會員操作</b><div id="recent" class="muted">載入中...</div></div></section>
 <section id="members" class="panel"><div class="card"><div class="row"><input id="search" class="input" placeholder="搜尋會員"><button class="btn soft" onclick="loadMembers()">搜尋</button><input id="newAccount" class="input" placeholder="新增會員帳號"><button class="btn primary" onclick="addMember()">新增會員</button></div><div id="memberMsg"></div><div class="table"><table><thead><tr><th>ID</th><th>帳號</th><th>狀態</th><th>最後登入</th><th>最後活動</th><th>到期日</th><th>操作</th></tr></thead><tbody id="memberRows"></tbody></table></div></div></section>
 <section id="detail" class="panel"><div class="card"><div class="row"><input id="detailId" class="input" placeholder="會員 ID"><button class="btn primary" onclick="loadDetail()">讀取</button></div><div id="detailBox" class="muted">請選會員。</div></div></section>
@@ -16,7 +38,25 @@
 </main></div>
 <script>
 const API="https://xinyao-atg-admin-api.love06130430.workers.dev",E=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])),F=s=>s?new Date(s+"Z").toLocaleString("zh-TW",{hour12:false}):"—";
-async function A(p,o={}){let r=await fetch(API+p,{cache:"no-store",headers:{"Content-Type":"application/json"},...o}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.message||d.error||"失敗");return d}
+async function A(p,o={}){
+  const token=sessionStorage.getItem("atg_admin_token")||"";
+  let r=await fetch(API+p,{
+    cache:"no-store",
+    ...o,
+    headers:{
+      "Content-Type":"application/json",
+      ...(token?{"Authorization":"Bearer "+token}:{}),
+      ...(o.headers||{})
+    }
+  });
+  let d=await r.json();
+  if(r.status===401 && p!=="/admin/login"){
+    adminLogout(false);
+    throw Error(d.message||"登入已失效");
+  }
+  if(!r.ok||!d.ok)throw Error(d.message||d.error||"失敗");
+  return d
+}
 const titles={overview:"總覽儀表板",members:"會員管理",detail:"會員詳細資料",kick:"強制登出",batch:"批次新增會員",wins:"恭喜會員紀錄",system:"系統狀態",logs:"操作紀錄",activity:"會員上線／操作紀錄"};
 document.addEventListener("click",e=>{let b=e.target.closest("[data-tab]");if(!b)return;document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));document.getElementById(b.dataset.tab).classList.add("active");title.textContent=titles[b.dataset.tab];if(b.dataset.tab==="members")loadMembers();if(b.dataset.tab==="wins")loadWins();if(b.dataset.tab==="logs")loadLogs();if(b.dataset.tab==="activity")loadActivity();if(b.dataset.tab==="system")health()});
 async function stats(){try{let s=(await A("/stats")).stats;for(let k of ["total","active","disabled","online","today_new"])document.getElementById(k).textContent=s[k]??0}catch(e){}}
@@ -34,5 +74,41 @@ async function loadWins(){try{let d=await A("/wins");winList.innerHTML=d.wins.ma
 async function addWin(){try{let d=await A("/wins",{method:"POST",body:JSON.stringify({member_display:wm.value,amount:wa.value,message:wt.value,image_url:wi.value})});winMsg.textContent=d.message;loadWins()}catch(e){winMsg.textContent=e.message}}
 async function toggleWin(id,v){await A("/wins/"+id,{method:"PATCH",body:JSON.stringify({is_visible:v})});loadWins()}async function delWin(id){if(confirm("確定刪除？")){await A("/wins/"+id,{method:"DELETE"});loadWins()}}
 async function health(){try{await A("/health");systemBox.innerHTML="🟢 Worker：正常<br>🟢 D1：正常"}catch(e){systemBox.textContent="🔴 "+e.message}}
-async function refreshAll(){await Promise.allSettled([stats(),loadMembers(),loadActivity(),loadLogs(),loadWins(),health()])}refreshAll();setInterval(()=>{stats();loadActivity()},60000);
+async function refreshAll(){await Promise.allSettled([stats(),loadMembers(),loadActivity(),loadLogs(),loadWins(),health()])}
+async function adminLogin(){
+  loginError.textContent="";
+  try{
+    const r=await fetch(API+"/admin/login",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({username:adminUser.value.trim(),password:adminPass.value})
+    });
+    const d=await r.json();
+    if(!r.ok||!d.ok)throw Error(d.message||"登入失敗");
+    sessionStorage.setItem("atg_admin_token",d.token);
+    adminPass.value="";
+    adminLoginScreen(false);
+    await refreshAll();
+  }catch(e){loginError.textContent=e.message}
+}
+function adminLoginScreen(show){
+  adminLogin.style.display=show?"flex":"none";
+  logoutBtn.style.display=show?"none":"inline-block";
+}
+function adminLogout(show=true){
+  sessionStorage.removeItem("atg_admin_token");
+  adminLoginScreen(true);
+  if(show) loginError.textContent="已登出";
+}
+async function checkAdminSession(){
+  const token=sessionStorage.getItem("atg_admin_token");
+  if(!token){adminLoginScreen(true);return}
+  try{await A("/admin/session");adminLoginScreen(false);await refreshAll()}
+  catch{adminLoginScreen(true)}
+}
+adminPass.addEventListener("keydown",e=>{if(e.key==="Enter")adminLogin()});
+adminUser.addEventListener("keydown",e=>{if(e.key==="Enter")adminLogin()});
+checkAdminSession();
+setInterval(()=>{if(sessionStorage.getItem("atg_admin_token")){stats();loadActivity()}},60000);
+
 </script></body></html>
