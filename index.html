@@ -211,6 +211,18 @@
 }
 </style>
 
+
+<style id="win-record-style">
+.win-record-text{font-size:17px;line-height:1.7;font-weight:700;color:#332832}
+.win-record-text .amount{font-size:20px;font-weight:1000;color:#e93f83}
+.win-record-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#winFile{padding:10px}
+@media(max-width:700px){
+  .win-record-text{font-size:16px}
+  .win-record-text .amount{font-size:19px}
+}
+</style>
+
 </head><body>
 <div id="adminLogin">
   <div class="loginCard">
@@ -231,7 +243,28 @@
 <section id="detail" class="panel"><div class="card"><div class="row"><input id="detailId" class="input" placeholder="會員 ID"><button class="btn primary" onclick="loadDetail()">讀取</button></div><div id="detailBox" class="muted">請選會員。</div></div></section>
 <section id="kick" class="panel"><div class="card"><div class="row"><input id="kickId" class="input" placeholder="會員 ID"><button class="btn danger" onclick="kick()">強制登出</button></div><div id="kickMsg"></div><p class="muted">ATG 前台需同步檢查 force_logout，才能真正踢下線。</p></div></section>
 <section id="batch" class="panel"><div class="card"><textarea id="batchText" rows="10" style="width:100%" placeholder="每行一個會員帳號"></textarea><button class="btn primary" onclick="batchAdd()">批次新增</button><div id="batchMsg"></div></div></section>
-<section id="wins" class="panel"><div class="two"><div class="card"><input id="wm" class="input" placeholder="m*****16"><input id="wa" class="input" type="number" placeholder="24270"><input id="wt" class="input" value="使用此程式贏得"><input id="wi" class="input" placeholder="照片網址"><button class="btn primary" onclick="addWin()">新增喜報</button><div id="winMsg"></div></div><div class="card"><div id="winList"></div></div></div></section>
+<section id="wins" class="panel">
+<div class="two">
+  <div class="card">
+    <b>新增恭喜會員紀錄</b>
+    <div style="display:grid;gap:9px;margin-top:12px">
+      <input id="wm" class="input" placeholder="會員顯示，例如 m*****16">
+      <input id="wa" class="input" type="number" placeholder="贏得金額，例如 24270">
+      <label class="muted" for="winFile">上傳照片／圖片檔案</label>
+      <input id="winFile" class="input" type="file" accept="image/*">
+      <div id="winPreviewWrap" style="display:none">
+        <img id="winPreview" alt="照片預覽" style="max-width:100%;max-height:220px;border-radius:12px;border:1px solid var(--line)">
+      </div>
+      <button class="btn primary" onclick="addWin()">新增喜報</button>
+      <div id="winMsg"></div>
+    </div>
+  </div>
+  <div class="card">
+    <b>目前喜報</b>
+    <div id="winList" style="margin-top:10px"></div>
+  </div>
+</div>
+</section>
 <section id="system" class="panel"><div class="card" id="systemBox">檢查中...</div></section>
 <section id="logs" class="panel"><div class="card"><div class="table"><table><thead><tr><th>時間</th><th>管理員</th><th>操作</th><th>對象</th><th>內容</th></tr></thead><tbody id="logRows"></tbody></table></div></div></section>
 <section id="activity" class="panel"><div class="card"><div class="table"><table><thead><tr><th>時間</th><th>會員</th><th>操作</th><th>內容</th><th>裝置</th></tr></thead><tbody id="activityRows"></tbody></table></div></div></section>
@@ -493,11 +526,14 @@ async function loadWins(){
     if(list){
       list.innerHTML=d.wins.map(w=>`
         <div class="win">
-          <b>${E(w.member_display)}｜${Number(w.amount||0).toLocaleString()}</b>
-          <div>${E(w.message)}</div>
-          ${w.image_url?`<img src="${E(w.image_url)}">`:""}
-          <button class="btn soft" onclick="toggleWin(${w.id},${w.is_visible?0:1})">${w.is_visible?"隱藏":"顯示"}</button>
-          <button class="btn danger" onclick="delWin(${w.id})">刪除</button>
+          <div class="win-record-text">
+            恭喜${E(w.member_display)}使用此程式贏得 <span class="amount">${Number(w.amount||0).toLocaleString()}</span>
+          </div>
+          ${w.image_url?`<img src="${E(w.image_url)}" alt="會員喜報照片">`:""}
+          <div class="win-record-actions">
+            <button class="btn soft" onclick="toggleWin(${w.id},${w.is_visible?0:1})">${w.is_visible?"隱藏":"顯示"}</button>
+            <button class="btn danger" onclick="delWin(${w.id})">刪除</button>
+          </div>
         </div>`).join("")||"尚無喜報";
     }
   }catch(e){
@@ -505,22 +541,92 @@ async function loadWins(){
   }
 }
 
+async function imageFileToDataURL(file){
+  if(!file) return "";
+
+  if(!file.type.startsWith("image/")){
+    throw new Error("請上傳圖片檔案");
+  }
+
+  const rawDataURL = await new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=()=>reject(new Error("照片讀取失敗"));
+    reader.readAsDataURL(file);
+  });
+
+  const img = await new Promise((resolve,reject)=>{
+    const image=new Image();
+    image.onload=()=>resolve(image);
+    image.onerror=()=>reject(new Error("照片格式無法讀取"));
+    image.src=rawDataURL;
+  });
+
+  const maxSize=1200;
+  let width=img.width;
+  let height=img.height;
+
+  if(width>maxSize || height>maxSize){
+    const scale=Math.min(maxSize/width,maxSize/height);
+    width=Math.round(width*scale);
+    height=Math.round(height*scale);
+  }
+
+  const canvas=document.createElement("canvas");
+  canvas.width=width;
+  canvas.height=height;
+
+  const ctx=canvas.getContext("2d");
+  ctx.drawImage(img,0,0,width,height);
+
+  return canvas.toDataURL("image/jpeg",0.78);
+}
+
 async function addWin(){
   const msg=$("winMsg");
+  const btn=document.querySelector('#wins button[onclick="addWin()"]');
+
   try{
+    const member=$("wm")?.value.trim()||"";
+    const amount=Number($("wa")?.value||0);
+    const file=$("winFile")?.files?.[0]||null;
+
+    if(!member) throw new Error("請輸入會員顯示帳號");
+    if(!amount) throw new Error("請輸入贏得金額");
+
+    if(btn){
+      btn.disabled=true;
+      btn.textContent=file?"照片處理中…":"新增中…";
+    }
+    if(msg) msg.textContent="";
+
+    const imageData = file ? await imageFileToDataURL(file) : "";
+
     const d=await A("/wins",{
       method:"POST",
       body:JSON.stringify({
-        member_display:$("wm")?.value||"",
-        amount:$("wa")?.value||0,
-        message:$("wt")?.value||"",
-        image_url:$("wi")?.value||""
+        member_display:member,
+        amount,
+        message:"使用此程式贏得",
+        image_url:imageData
       })
     });
+
     if(msg)msg.textContent=d.message;
+    if($("wm"))$("wm").value="";
+    if($("wa"))$("wa").value="";
+    if($("winFile"))$("winFile").value="";
+    if($("winPreviewWrap"))$("winPreviewWrap").style.display="none";
+    if($("winPreview"))$("winPreview").removeAttribute("src");
+
     await loadWins();
   }catch(e){
     if(msg)msg.textContent=e.message;
+  }finally{
+    if(btn){
+      btn.disabled=false;
+      btn.textContent="新增喜報";
+    }
   }
 }
 
@@ -645,6 +751,25 @@ document.addEventListener("DOMContentLoaded",()=>{
   const loginBtn=$("adminLoginBtn");
   const userInput=$("adminUser");
   const passInput=$("adminPass");
+  const winFileInput=$("winFile");
+
+  if(winFileInput){
+    winFileInput.addEventListener("change",()=>{
+      const file=winFileInput.files?.[0];
+      const wrap=$("winPreviewWrap");
+      const preview=$("winPreview");
+      if(!file || !preview || !wrap){
+        if(wrap)wrap.style.display="none";
+        return;
+      }
+      const reader=new FileReader();
+      reader.onload=()=>{
+        preview.src=reader.result;
+        wrap.style.display="block";
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 
   if(loginBtn){
     loginBtn.addEventListener("click",()=>{
