@@ -219,7 +219,7 @@
     <p>管理員登入</p>
     <input id="adminUser" autocomplete="username" placeholder="管理員帳號">
     <input id="adminPass" type="password" autocomplete="current-password" placeholder="管理員密碼">
-    <button onclick="adminLogin()">登入後台</button>
+    <button id="adminLoginBtn" type="button">登入後台</button>
     <div id="loginError"></div>
   </div>
 </div>
@@ -641,21 +641,39 @@ async function checkAdminSession(){
   }
 }
 
-$("adminPass")?.addEventListener("keydown",e=>{
-  if(e.key==="Enter")adminLogin();
-});
 
-$("adminUser")?.addEventListener("keydown",e=>{
-  if(e.key==="Enter")adminLogin();
-});
+document.addEventListener("DOMContentLoaded",()=>{
+  const loginBtn=$("adminLoginBtn");
+  const userInput=$("adminUser");
+  const passInput=$("adminPass");
 
-checkAdminSession();
-
-setInterval(()=>{
-  if(sessionStorage.getItem("atg_admin_token")){
-    stats();
-    loadActivity();
+  if(loginBtn){
+    loginBtn.addEventListener("click",()=>{
+      adminLogin();
+    });
   }
-},60000);
+
+  if(passInput){
+    passInput.addEventListener("keydown",e=>{
+      if(e.key==="Enter") adminLogin();
+    });
+  }
+
+  if(userInput){
+    userInput.addEventListener("keydown",e=>{
+      if(e.key==="Enter") adminLogin();
+    });
+  }
+
+  checkAdminSession();
+
+  setInterval(()=>{
+    if(sessionStorage.getItem("atg_admin_token")){
+      stats();
+      loadActivity();
+    }
+  },60000);
+});
+
 </script>
 </body></html>
