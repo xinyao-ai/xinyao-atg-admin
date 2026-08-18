@@ -32,8 +32,14 @@
     <div class="topbar"><div><h2 id="pageTitle">總覽儀表板</h2><div style="color:var(--muted);font-size:13px;margin-top:4px">ATG 管理中心第一版介面</div></div><div class="top-actions"><div class="status-pill">系統正常</div><div class="admin-pill">管理員：xinyao</div></div></div>
 
     <section class="panel active" id="dashboard">
-      <div class="grid stats"><div class="card stat"><div class="label">總會員數</div><div class="value" id="totalMembers">—</div><div class="hint">D1 即時資料</div></div><div class="card stat"><div class="label">目前上線</div><div class="value">17</div><div class="hint">測試資料</div></div><div class="card stat"><div class="label">今日分析次數</div><div class="value">246</div><div class="hint">測試資料</div></div><div class="card stat"><div class="label">今日新增會員</div><div class="value">8</div><div class="hint">測試資料</div></div></div>
-      <div class="two" style="margin-top:14px"><div class="card"><div class="section-title"><h3>最近會員操作</h3><button class="btn soft" data-jump="activity">查看更多</button></div><div class="log-list"><div class="log-item"><b>love613710 使用房號分析</b><small>18:42｜戰神賽特｜房號 417</small></div><div class="log-item"><b>m*****16 使用續玩分析</b><small>18:40｜操作成功</small></div><div class="log-item"><b>a*****88 登入系統</b><small>18:38｜iPhone</small></div></div></div><div class="card"><div class="section-title"><h3>快速操作</h3></div><div class="toolbar"><button class="btn primary" data-jump="members">會員管理</button><button class="btn soft" data-jump="batch">批次新增</button><button class="btn soft" data-jump="wins">新增喜報</button><button class="btn danger" data-jump="kick">強制登出</button></div></div></div>
+      <div class="grid stats">
+          <div class="card stat"><div class="label">總會員數</div><div class="value" id="statTotal">—</div><div class="hint">D1 即時資料</div></div>
+          <div class="card stat"><div class="label">正常會員</div><div class="value" id="statActive">—</div><div class="hint">目前可使用</div></div>
+          <div class="card stat"><div class="label">停用會員</div><div class="value" id="statDisabled">—</div><div class="hint">目前停用</div></div>
+          <div class="card stat"><div class="label">目前上線</div><div class="value" id="statOnline">—</div><div class="hint">8 分鐘內有活動</div></div>
+          <div class="card stat"><div class="label">今日新增</div><div class="value" id="statTodayNew">—</div><div class="hint">今日建立會員</div></div>
+        </div>
+        <div class="two" style="margin-top:14px"><div class="card"><div class="section-title"><h3>最近會員操作</h3><button class="btn soft" data-jump="activity">查看更多</button></div><div class="log-list"><div class="log-item"><b>love613710 使用房號分析</b><small>18:42｜戰神賽特｜房號 417</small></div><div class="log-item"><b>m*****16 使用續玩分析</b><small>18:40｜操作成功</small></div><div class="log-item"><b>a*****88 登入系統</b><small>18:38｜iPhone</small></div></div></div><div class="card"><div class="section-title"><h3>快速操作</h3></div><div class="toolbar"><button class="btn primary" data-jump="members">會員管理</button><button class="btn soft" data-jump="batch">批次新增</button><button class="btn soft" data-jump="wins">新增喜報</button><button class="btn danger" data-jump="kick">強制登出</button></div></div></div>
     </section>
 
     <section class="panel" id="members"><div class="card"><div class="section-title"><h3>會員管理</h3><div class="toolbar"><input class="input" placeholder="搜尋會員帳號" style="width:220px"><button class="btn primary">新增會員</button></div></div><div class="table-wrap"><table><thead><tr><th>會員帳號</th><th>狀態</th><th>最後登入</th><th>分析次數</th><th>到期日</th><th>操作</th></tr></thead><tbody id="membersBody"><tr><td colspan="6">正在讀取 D1 會員資料…</td></tr></tbody></table></div></div></section>
@@ -73,6 +79,34 @@ async function loadMembers(){
  }catch(e){body.innerHTML=`<tr><td colspan="6" style="color:#e24d7d">讀取會員失敗：${esc(e.message)}</td></tr>`;}
 }
 loadMembers();
+
+
+const API_URL = "https://xinyao-atg-admin-api.love06130430.workers.dev";
+
+async function loadStats(){
+  try{
+    const res = await fetch(`${API_URL}/stats`, {cache:"no-store"});
+    const data = await res.json();
+    if(!res.ok || !data.ok) throw new Error(data.error || data.message || "讀取失敗");
+    const s = data.stats || {};
+    const values = {
+      statTotal: s.total ?? 0,
+      statActive: s.active ?? 0,
+      statDisabled: s.disabled ?? 0,
+      statOnline: s.online ?? 0,
+      statTodayNew: s.today_new ?? 0
+    };
+    Object.entries(values).forEach(([id,value])=>{
+      const el = document.getElementById(id);
+      if(el) el.textContent = value;
+    });
+  }catch(err){
+    console.error("讀取總覽統計失敗：", err);
+  }
+}
+
+loadStats();
+setInterval(loadStats, 60000);
 
 </script>
 </body></html>
