@@ -11,6 +11,206 @@
 #loginError{min-height:20px;margin-top:10px;color:#e84c69;font-size:12px;font-weight:800}
 #logoutBtn{display:none}
 </style>
+
+<style id="mobile-admin-layout">
+@media (max-width: 700px){
+  body{background:#fff7fb}
+  .app{display:block;min-height:100vh}
+  .side{
+    position:sticky;top:0;z-index:50;height:auto;
+    padding:10px 10px 8px;
+    border-right:0;border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(12px);
+  }
+  .brand{
+    padding:5px 4px 9px;
+    font-size:17px;
+    text-align:center;
+  }
+  .nav{
+    display:flex;
+    gap:7px;
+    overflow-x:auto;
+    padding-bottom:3px;
+    scrollbar-width:none;
+  }
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{
+    flex:0 0 auto;
+    white-space:nowrap;
+    padding:9px 11px;
+    border-radius:999px;
+    font-size:12px;
+  }
+
+  .main{padding:12px 10px 28px}
+  .top{
+    position:sticky;top:86px;z-index:35;
+    background:rgba(255,247,251,.94);
+    backdrop-filter:blur(10px);
+    margin:-2px -2px 10px;
+    padding:8px 2px;
+    gap:8px;
+  }
+  .top h2{font-size:20px;margin:0}
+  .top .row{gap:6px;flex-wrap:nowrap}
+  .top .btn{padding:8px 10px;font-size:12px}
+
+  .stats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  .card{
+    border-radius:16px;
+    padding:13px;
+    margin:10px 0;
+  }
+  .stat b{font-size:25px}
+  .muted{font-size:12px}
+
+  .row{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .row .input,
+  .row select,
+  .row textarea,
+  .row .btn{
+    width:100%;
+    min-width:0;
+  }
+  .input,select,textarea{
+    width:100%;
+    font-size:16px;
+  }
+  .btn{min-height:42px}
+
+  .two{grid-template-columns:1fr}
+
+  /* 手機版把會員表格改成卡片，不再左右拖 */
+  #members .table,
+  #logs .table,
+  #activity .table{
+    overflow:visible;
+    border:0;
+  }
+  #members table,
+  #logs table,
+  #activity table{
+    min-width:0;
+    width:100%;
+  }
+  #members thead,
+  #logs thead,
+  #activity thead{display:none}
+
+  #members tbody,
+  #logs tbody,
+  #activity tbody{
+    display:grid;
+    gap:10px;
+  }
+  #members tr,
+  #logs tr,
+  #activity tr{
+    display:block;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:15px;
+    padding:10px 12px;
+    box-shadow:0 8px 22px #d9548b0c;
+  }
+  #members td,
+  #logs td,
+  #activity td{
+    display:grid;
+    grid-template-columns:82px 1fr;
+    gap:8px;
+    align-items:start;
+    padding:7px 0;
+    border-bottom:1px dashed #f3e5ec;
+    font-size:13px;
+    word-break:break-word;
+  }
+  #members td:last-child,
+  #logs td:last-child,
+  #activity td:last-child{border-bottom:0}
+
+  #members td:nth-child(1)::before{content:"ID"}
+  #members td:nth-child(2)::before{content:"帳號"}
+  #members td:nth-child(3)::before{content:"狀態"}
+  #members td:nth-child(4)::before{content:"最後登入"}
+  #members td:nth-child(5)::before{content:"最後活動"}
+  #members td:nth-child(6)::before{content:"到期日"}
+  #members td:nth-child(7)::before{content:"操作"}
+
+  #logs td:nth-child(1)::before{content:"時間"}
+  #logs td:nth-child(2)::before{content:"管理員"}
+  #logs td:nth-child(3)::before{content:"操作"}
+  #logs td:nth-child(4)::before{content:"對象"}
+  #logs td:nth-child(5)::before{content:"內容"}
+
+  #activity td:nth-child(1)::before{content:"時間"}
+  #activity td:nth-child(2)::before{content:"會員"}
+  #activity td:nth-child(3)::before{content:"操作"}
+  #activity td:nth-child(4)::before{content:"內容"}
+  #activity td:nth-child(5)::before{content:"裝置"}
+
+  #members td::before,
+  #logs td::before,
+  #activity td::before{
+    color:#9b7f8d;
+    font-weight:800;
+    font-size:12px;
+  }
+
+  #members td:last-child{
+    display:flex;
+    gap:7px;
+    flex-wrap:wrap;
+  }
+  #members td:last-child::before{
+    width:82px;
+    flex:0 0 82px;
+  }
+  #members td:last-child .btn{
+    width:auto;
+    min-height:36px;
+    padding:8px 10px;
+  }
+
+  #detailBox .input,
+  #detailBox select,
+  #detailBox .btn{
+    width:100%;
+    margin:5px 0;
+  }
+
+  .win img{
+    max-width:100%;
+    width:100%;
+    height:auto;
+  }
+
+  #adminLogin{padding:14px}
+  .loginCard{
+    width:100%;
+    max-width:420px;
+    padding:24px 18px;
+    border-radius:22px;
+  }
+}
+
+@media (max-width: 420px){
+  .stats{grid-template-columns:1fr 1fr}
+  .stat{padding:12px}
+  .stat b{font-size:22px}
+  .top{top:84px}
+}
+</style>
+
 </head><body>
 <div id="adminLogin">
   <div class="loginCard">
