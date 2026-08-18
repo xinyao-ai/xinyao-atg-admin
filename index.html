@@ -32,11 +32,11 @@
     <div class="topbar"><div><h2 id="pageTitle">總覽儀表板</h2><div style="color:var(--muted);font-size:13px;margin-top:4px">ATG 管理中心第一版介面</div></div><div class="top-actions"><div class="status-pill">系統正常</div><div class="admin-pill">管理員：xinyao</div></div></div>
 
     <section class="panel active" id="dashboard">
-      <div class="grid stats"><div class="card stat"><div class="label">總會員數</div><div class="value">128</div><div class="hint">測試資料</div></div><div class="card stat"><div class="label">目前上線</div><div class="value">17</div><div class="hint">測試資料</div></div><div class="card stat"><div class="label">今日分析次數</div><div class="value">246</div><div class="hint">測試資料</div></div><div class="card stat"><div class="label">今日新增會員</div><div class="value">8</div><div class="hint">測試資料</div></div></div>
+      <div class="grid stats"><div class="card stat"><div class="label">總會員數</div><div class="value" id="totalMembers">—</div><div class="hint">D1 即時資料</div></div><div class="card stat"><div class="label">目前上線</div><div class="value">17</div><div class="hint">測試資料</div></div><div class="card stat"><div class="label">今日分析次數</div><div class="value">246</div><div class="hint">測試資料</div></div><div class="card stat"><div class="label">今日新增會員</div><div class="value">8</div><div class="hint">測試資料</div></div></div>
       <div class="two" style="margin-top:14px"><div class="card"><div class="section-title"><h3>最近會員操作</h3><button class="btn soft" data-jump="activity">查看更多</button></div><div class="log-list"><div class="log-item"><b>love613710 使用房號分析</b><small>18:42｜戰神賽特｜房號 417</small></div><div class="log-item"><b>m*****16 使用續玩分析</b><small>18:40｜操作成功</small></div><div class="log-item"><b>a*****88 登入系統</b><small>18:38｜iPhone</small></div></div></div><div class="card"><div class="section-title"><h3>快速操作</h3></div><div class="toolbar"><button class="btn primary" data-jump="members">會員管理</button><button class="btn soft" data-jump="batch">批次新增</button><button class="btn soft" data-jump="wins">新增喜報</button><button class="btn danger" data-jump="kick">強制登出</button></div></div></div>
     </section>
 
-    <section class="panel" id="members"><div class="card"><div class="section-title"><h3>會員管理</h3><div class="toolbar"><input class="input" placeholder="搜尋會員帳號" style="width:220px"><button class="btn primary">新增會員</button></div></div><div class="table-wrap"><table><thead><tr><th>會員帳號</th><th>狀態</th><th>最後登入</th><th>分析次數</th><th>到期日</th><th>操作</th></tr></thead><tbody><tr><td>love613710</td><td><span class="badge online">● 在線</span></td><td>今天 18:42</td><td>86</td><td>永久</td><td><button class="btn soft">詳細</button></td></tr><tr><td>m*****16</td><td><span class="badge offline">離線</span></td><td>今天 17:31</td><td>41</td><td>2026/09/30</td><td><button class="btn soft">詳細</button></td></tr><tr><td>a*****88</td><td><span class="badge active">已開通</span></td><td>昨天 23:10</td><td>12</td><td>2026/08/31</td><td><button class="btn soft">詳細</button></td></tr></tbody></table></div></div></section>
+    <section class="panel" id="members"><div class="card"><div class="section-title"><h3>會員管理</h3><div class="toolbar"><input class="input" placeholder="搜尋會員帳號" style="width:220px"><button class="btn primary">新增會員</button></div></div><div class="table-wrap"><table><thead><tr><th>會員帳號</th><th>狀態</th><th>最後登入</th><th>分析次數</th><th>到期日</th><th>操作</th></tr></thead><tbody id="membersBody"><tr><td colspan="6">正在讀取 D1 會員資料…</td></tr></tbody></table></div></div></section>
 
     <section class="panel" id="detail"><div class="two"><div class="card"><div class="section-title"><h3>會員詳細資料</h3></div><div class="form-row"><div class="field"><label>會員帳號</label><input class="input" value="love613710"></div><div class="field"><label>狀態</label><select><option>正常</option><option>停用</option></select></div><div class="field"><label>建立時間</label><input class="input" value="2026/08/01 14:22"></div><div class="field"><label>最後登入</label><input class="input" value="2026/08/18 18:42"></div><div class="field"><label>累積分析次數</label><input class="input" value="86"></div><div class="field"><label>到期日</label><input class="input" value="永久"></div></div><div class="toolbar" style="margin-top:14px"><button class="btn primary">儲存資料</button><button class="btn danger">停用會員</button></div></div><div class="card"><div class="section-title"><h3>最近紀錄</h3></div><div class="log-list"><div class="log-item"><b>房號分析｜417</b><small>18:42</small></div><div class="log-item"><b>續玩分析｜戰神賽特</b><small>18:20</small></div><div class="log-item"><b>登入系統</b><small>18:12</small></div></div></div></div></section>
 
@@ -58,5 +58,21 @@
 const titles={dashboard:"總覽儀表板",members:"會員管理",detail:"會員詳細資料",kick:"強制登出",batch:"批次新增會員",wins:"恭喜會員紀錄",system:"系統狀態",adminlog:"操作紀錄",activity:"會員上線／操作紀錄"};
 function openPage(id){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById(id)?.classList.add('active');document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===id));document.getElementById('pageTitle').textContent=titles[id]||'管理後台';window.scrollTo({top:0,behavior:'smooth'})}
 document.addEventListener('click',e=>{const p=e.target.closest('[data-page]');if(p)openPage(p.dataset.page);const j=e.target.closest('[data-jump]');if(j)openPage(j.dataset.jump)});
+
+const API_BASE="https://xinyao-atg-admin-api.love06130430.workers.dev";
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmtDate(v){if(!v)return '—'; const d=new Date(String(v).replace(' ','T')+'Z'); return isNaN(d)?esc(v):d.toLocaleString('zh-TW',{hour12:false})}
+async function loadMembers(){
+ const body=document.getElementById('membersBody');
+ try{
+  const r=await fetch(API_BASE+'/members',{cache:'no-store'}); const data=await r.json();
+  if(!r.ok||!data.ok) throw new Error(data.message||'讀取失敗');
+  const ms=Array.isArray(data.members)?data.members:[];
+  document.getElementById('totalMembers').textContent=ms.length;
+  body.innerHTML=ms.length?ms.map(m=>`<tr><td>${esc(m.account)}</td><td><span class="badge ${m.status==='active'?'active':'offline'}">${m.status==='active'?'已開通':'停用'}</span></td><td>${fmtDate(m.last_login_at)}</td><td>—</td><td>${m.expires_at?esc(m.expires_at):'永久'}</td><td><button class="btn soft" data-member="${esc(m.account)}">詳細</button></td></tr>`).join(''):'<tr><td colspan="6">目前沒有會員</td></tr>';
+ }catch(e){body.innerHTML=`<tr><td colspan="6" style="color:#e24d7d">讀取會員失敗：${esc(e.message)}</td></tr>`;}
+}
+loadMembers();
+
 </script>
 </body></html>
