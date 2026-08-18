@@ -356,8 +356,7 @@ async function addMember(){
 async function batchAdd(){
   const msg=$("batchMsg");
   try{
-    const accounts=($("batchText")?.value||"").split(/
-|,/).map(x=>x.trim()).filter(Boolean);
+    const accounts=($("batchText")?.value||"").split(/\n|,/).map(x=>x.trim()).filter(Boolean);
     const d=await A("/members/batch",{method:"POST",body:JSON.stringify({accounts})});
     if(msg)msg.textContent=`新增 ${d.added}，略過 ${d.skipped}`;
     await stats();
