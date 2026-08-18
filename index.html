@@ -76,29 +76,31 @@ async function toggleWin(id,v){await A("/wins/"+id,{method:"PATCH",body:JSON.str
 async function health(){try{await A("/health");systemBox.innerHTML="🟢 Worker：正常<br>🟢 D1：正常"}catch(e){systemBox.textContent="🔴 "+e.message}}
 async function refreshAll(){await Promise.allSettled([stats(),loadMembers(),loadActivity(),loadLogs(),loadWins(),health()])}
 async function adminLogin(){
-  loginError.textContent="";
+  document.getElementById("loginError").textContent="";
   try{
     const r=await fetch(API+"/admin/login",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({username:adminUser.value.trim(),password:adminPass.value})
+      body:JSON.stringify({username:document.getElementById("adminUser").value.trim(),password:document.getElementById("adminPass").value})
     });
     const d=await r.json();
     if(!r.ok||!d.ok)throw Error(d.message||"登入失敗");
     sessionStorage.setItem("atg_admin_token",d.token);
-    adminPass.value="";
+    document.getElementById("adminPass").value="";
     adminLoginScreen(false);
     await refreshAll();
-  }catch(e){loginError.textContent=e.message}
+  }catch(e){document.getElementById("loginError").textContent=e.message}
 }
 function adminLoginScreen(show){
-  adminLogin.style.display=show?"flex":"none";
-  logoutBtn.style.display=show?"none":"inline-block";
+  const loginScreen = document.getElementById("adminLogin");
+  const logoutButton = document.getElementById("logoutBtn");
+  if(loginScreen) loginScreen.style.display = show ? "flex" : "none";
+  if(logoutButton) logoutButton.style.display = show ? "none" : "inline-block";
 }
 function adminLogout(show=true){
   sessionStorage.removeItem("atg_admin_token");
   adminLoginScreen(true);
-  if(show) loginError.textContent="已登出";
+  if(show) document.getElementById("loginError").textContent="已登出";
 }
 async function checkAdminSession(){
   const token=sessionStorage.getItem("atg_admin_token");
@@ -106,8 +108,8 @@ async function checkAdminSession(){
   try{await A("/admin/session");adminLoginScreen(false);await refreshAll()}
   catch{adminLoginScreen(true)}
 }
-adminPass.addEventListener("keydown",e=>{if(e.key==="Enter")adminLogin()});
-adminUser.addEventListener("keydown",e=>{if(e.key==="Enter")adminLogin()});
+document.getElementById("adminPass").addEventListener("keydown",e=>{if(e.key==="Enter")adminLogin()});
+document.getElementById("adminUser").addEventListener("keydown",e=>{if(e.key==="Enter")adminLogin()});
 checkAdminSession();
 setInterval(()=>{if(sessionStorage.getItem("atg_admin_token")){stats();loadActivity()}},60000);
 
