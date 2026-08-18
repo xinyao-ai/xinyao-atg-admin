@@ -251,9 +251,9 @@
       <input id="wm" class="input" placeholder="會員顯示，例如 m*****16">
       <input id="wa" class="input" type="number" placeholder="贏得金額，例如 24270">
       <label class="muted" for="winFile">上傳照片／圖片檔案</label>
-      <input id="winFile" class="input" type="file" accept="image/*">
+      <input id="winFile" class="input" type="file" accept="image/*" multiple>
       <div id="winPreviewWrap" style="display:none">
-        <img id="winPreview" alt="照片預覽" style="max-width:100%;max-height:220px;border-radius:12px;border:1px solid var(--line)">
+        <div id="winPreviewGrid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"></div>
       </div>
       <button class="btn primary" onclick="addWin()">新增喜報</button>
       <div id="winMsg"></div>
@@ -519,6 +519,20 @@ async function loadLogs(){
   }
 }
 
+function parseWinImages(value){
+  if(!value)return[];
+
+  try{
+    const parsed=JSON.parse(value);
+
+    return Array.isArray(parsed)
+      ? parsed.filter(Boolean)
+      : [value];
+  }catch{
+    return [value];
+  }
+}
+
 async function loadWins(){
   const list=$("winList");
   try{
@@ -529,7 +543,11 @@ async function loadWins(){
           <div class="win-record-text">
             恭喜${E(w.member_display)}使用此程式贏得 <span class="amount">${Number(w.amount||0).toLocaleString()}</span>
           </div>
-          ${w.image_url?`<img src="${E(w.image_url)}" alt="會員喜報照片">`:""}
+          ${parseWinImages(w.image_url).length
+  ? `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px">
+      ${parseWinImages(w.image_url).map(src=>`<img src="${E(src)}" alt="會員喜報照片" style="width:100%;height:120px;object-fit:cover;border-radius:10px">`).join("")}
+    </div>`
+  : ""}
           <div class="win-record-actions">
             <button class="btn soft" onclick="toggleWin(${w.id},${w.is_visible?0:1})">${w.is_visible?"隱藏":"顯示"}</button>
             <button class="btn danger" onclick="delWin(${w.id})">刪除</button>
@@ -562,7 +580,7 @@ async function imageFileToDataURL(file){
     image.src=rawDataURL;
   });
 
-  const maxSize=1200;
+  const maxSize=900;
   let width=img.width;
   let height=img.height;
 
@@ -579,7 +597,7 @@ async function imageFileToDataURL(file){
   const ctx=canvas.getContext("2d");
   ctx.drawImage(img,0,0,width,height);
 
-  return canvas.toDataURL("image/jpeg",0.78);
+  return canvas.toDataURL("image/jpeg",0.70);
 }
 
 async function addWin(){
@@ -589,18 +607,27 @@ async function addWin(){
   try{
     const member=$("wm")?.value.trim()||"";
     const amount=Number($("wa")?.value||0);
-    const file=$("winFile")?.files?.[0]||null;
+    const files=[...($("winFile")?.files||[])];
 
     if(!member) throw new Error("請輸入會員顯示帳號");
     if(!amount) throw new Error("請輸入贏得金額");
+    if(files.length>5) throw new Error("一次最多上傳 5 張照片");
 
     if(btn){
       btn.disabled=true;
-      btn.textContent=file?"照片處理中…":"新增中…";
+      btn.textContent=files.length?"照片處理中…":"新增中…";
     }
     if(msg) msg.textContent="";
 
-    const imageData = file ? await imageFileToDataURL(file) : "";
+    const images=[];
+    for(const file of files){
+      images.push(await imageFileToDataURL(file));
+    }
+
+    const imagePayload=
+      images.length
+        ? JSON.stringify(images)
+        : "";
 
     const d=await A("/wins",{
       method:"POST",
@@ -608,7 +635,7 @@ async function addWin(){
         member_display:member,
         amount,
         message:"使用此程式贏得",
-        image_url:imageData
+        image_url:imagePayload
       })
     });
 
@@ -617,7 +644,7 @@ async function addWin(){
     if($("wa"))$("wa").value="";
     if($("winFile"))$("winFile").value="";
     if($("winPreviewWrap"))$("winPreviewWrap").style.display="none";
-    if($("winPreview"))$("winPreview").removeAttribute("src");
+    if($("winPreviewGrid"))$("winPreviewGrid").innerHTML="";
 
     await loadWins();
   }catch(e){
@@ -755,19 +782,32 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   if(winFileInput){
     winFileInput.addEventListener("change",()=>{
-      const file=winFileInput.files?.[0];
+      const files=[...(winFileInput.files||[])];
       const wrap=$("winPreviewWrap");
-      const preview=$("winPreview");
-      if(!file || !preview || !wrap){
+      const grid=$("winPreviewGrid");
+
+      if(!files.length || !wrap || !grid){
         if(wrap)wrap.style.display="none";
         return;
       }
-      const reader=new FileReader();
-      reader.onload=()=>{
-        preview.src=reader.result;
-        wrap.style.display="block";
-      };
-      reader.readAsDataURL(file);
+
+      grid.innerHTML="";
+
+      files.slice(0,5).forEach(file=>{
+        const reader=new FileReader();
+
+        reader.onload=()=>{
+          const img=document.createElement("img");
+          img.src=reader.result;
+          img.alt="照片預覽";
+          img.style.cssText="width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--line)";
+          grid.appendChild(img);
+        };
+
+        reader.readAsDataURL(file);
+      });
+
+      wrap.style.display="block";
     });
   }
 
