@@ -223,6 +223,67 @@
 }
 </style>
 
+
+<style id="win-edit-style">
+.win-edit-modal{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(35,20,28,.46);
+  backdrop-filter:blur(4px);
+}
+.win-edit-modal.show{display:flex}
+.win-edit-card{
+  width:min(560px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 24px 80px rgba(95,42,67,.22);
+}
+.win-edit-card h3{margin:0 0 14px}
+.win-edit-grid{display:grid;gap:10px}
+.win-edit-old-images{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.win-edit-image{
+  position:relative;
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff7fb;
+}
+.win-edit-image img{
+  display:block;
+  width:100%;
+  height:120px;
+  object-fit:cover;
+}
+.win-edit-image label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 9px;
+  font-size:12px;
+  font-weight:800;
+  color:#d83f7f;
+}
+.win-edit-actions{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+}
+.win-edit-actions .btn{flex:1}
+</style>
+
 </head><body>
 <div id="adminLogin">
   <div class="loginCard">
@@ -533,22 +594,29 @@ function parseWinImages(value){
   }
 }
 
+let currentWins=[];
+
 async function loadWins(){
   const list=$("winList");
   try{
     const d=await A("/wins");
+    currentWins=d.wins||[];
     if(list){
       list.innerHTML=d.wins.map(w=>`
         <div class="win">
           <div class="win-record-text">
             恭喜${E(w.member_display)}使用此程式贏得 <span class="amount">${Number(w.amount||0).toLocaleString()}</span>
           </div>
+          <div class="muted" style="margin-top:4px">顯示順序：${Number(w.sort_order||0)}（數字越大越前面）</div>
           ${parseWinImages(w.image_url).length
   ? `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px">
       ${parseWinImages(w.image_url).map(src=>`<img src="${E(src)}" alt="會員喜報照片" style="width:100%;height:120px;object-fit:cover;border-radius:10px">`).join("")}
     </div>`
   : ""}
           <div class="win-record-actions">
+            <button class="btn soft" onclick="editWin(${w.id})">編輯</button>
+            <button class="btn soft" onclick="moveWin(${w.id},1)">↑ 上移</button>
+            <button class="btn soft" onclick="moveWin(${w.id},-1)">↓ 下移</button>
             <button class="btn soft" onclick="toggleWin(${w.id},${w.is_visible?0:1})">${w.is_visible?"隱藏":"顯示"}</button>
             <button class="btn danger" onclick="delWin(${w.id})">刪除</button>
           </div>
@@ -654,6 +722,160 @@ async function addWin(){
       btn.disabled=false;
       btn.textContent="新增喜報";
     }
+  }
+}
+
+
+let editingWinId=null;
+
+function editWin(id){
+  const win=currentWins.find(x=>Number(x.id)===Number(id));
+  if(!win){
+    alert("找不到這筆喜報");
+    return;
+  }
+
+  editingWinId=id;
+
+  $("editWinMember").value=win.member_display||"";
+  $("editWinAmount").value=win.amount||"";
+  $("editWinSortOrder").value=Number(win.sort_order||0);
+  $("editWinFiles").value="";
+  $("editWinMsg").textContent="";
+
+  const images=parseWinImages(win.image_url);
+  const box=$("editWinOldImages");
+
+  box.innerHTML=images.length
+    ? images.map((src,i)=>`
+        <div class="win-edit-image">
+          <img src="${E(src)}" alt="目前照片">
+          <label>
+            <input type="checkbox" class="edit-remove-image" value="${i}">
+            刪除此照片
+          </label>
+        </div>
+      `).join("")
+    : '<div class="muted">目前沒有照片</div>';
+
+  $("winEditModal").classList.add("show");
+}
+
+function closeWinEdit(){
+  editingWinId=null;
+  $("winEditModal").classList.remove("show");
+}
+
+async function saveWinEdit(){
+  const msg=$("editWinMsg");
+
+  try{
+    if(!editingWinId){
+      throw new Error("找不到要編輯的紀錄");
+    }
+
+    const win=currentWins.find(
+      x=>Number(x.id)===Number(editingWinId)
+    );
+
+    if(!win){
+      throw new Error("找不到這筆喜報");
+    }
+
+    const member=$("editWinMember").value.trim();
+    const amount=Number($("editWinAmount").value||0);
+    const sortOrder=Number($("editWinSortOrder").value||0);
+
+    if(!member)throw new Error("請輸入會員顯示帳號");
+    if(!amount)throw new Error("請輸入贏得金額");
+
+    const oldImages=parseWinImages(win.image_url);
+
+    const removeIndexes=[
+      ...document.querySelectorAll(".edit-remove-image:checked")
+    ].map(x=>Number(x.value));
+
+    const keptImages=oldImages.filter(
+      (_,i)=>!removeIndexes.includes(i)
+    );
+
+    const newFiles=[...($("editWinFiles").files||[])];
+
+    if(keptImages.length+newFiles.length>5){
+      throw new Error("同一筆喜報最多 5 張照片");
+    }
+
+    msg.textContent=
+      newFiles.length
+        ? "照片處理中…"
+        : "儲存中…";
+
+    const newImages=[];
+
+    for(const file of newFiles){
+      newImages.push(
+        await imageFileToDataURL(file)
+      );
+    }
+
+    const finalImages=[
+      ...keptImages,
+      ...newImages
+    ];
+
+    await A("/wins/"+editingWinId,{
+      method:"PATCH",
+      body:JSON.stringify({
+        member_display:member,
+        amount,
+        message:"使用此程式贏得",
+        sort_order:sortOrder,
+        image_url:finalImages.length
+          ? JSON.stringify(finalImages)
+          : ""
+      })
+    });
+
+    closeWinEdit();
+    await loadWins();
+
+  }catch(e){
+    msg.textContent=e.message;
+  }
+}
+
+document.addEventListener("click",(e)=>{
+  const modal=$("winEditModal");
+  if(e.target===modal){
+    closeWinEdit();
+  }
+});
+
+
+async function moveWin(id,direction){
+  try{
+    const win=currentWins.find(
+      x=>Number(x.id)===Number(id)
+    );
+
+    if(!win){
+      throw new Error("找不到這筆喜報");
+    }
+
+    const current=Number(win.sort_order||0);
+
+    await A("/wins/"+id,{
+      method:"PATCH",
+      body:JSON.stringify({
+        sort_order:
+          current + Number(direction||0)
+      })
+    });
+
+    await loadWins();
+
+  }catch(e){
+    alert(e.message);
   }
 }
 
@@ -840,4 +1062,34 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 
 </script>
+
+<div id="winEditModal" class="win-edit-modal">
+  <div class="win-edit-card">
+    <h3>✏️ 編輯恭喜會員紀錄</h3>
+
+    <div class="win-edit-grid">
+      <input id="editWinMember" class="input" placeholder="會員顯示帳號">
+      <input id="editWinAmount" class="input" type="number" placeholder="贏得金額">
+      <input id="editWinSortOrder" class="input" type="number" placeholder="顯示順序，數字越大越前面">
+
+      <div>
+        <div class="muted" style="margin-bottom:7px">目前照片（勾選要刪除的照片）</div>
+        <div id="editWinOldImages" class="win-edit-old-images"></div>
+      </div>
+
+      <div>
+        <label class="muted" for="editWinFiles">新增照片（可多選，總數最多 5 張）</label>
+        <input id="editWinFiles" class="input" type="file" accept="image/*" multiple>
+      </div>
+
+      <div id="editWinMsg" class="muted"></div>
+    </div>
+
+    <div class="win-edit-actions">
+      <button class="btn soft" type="button" onclick="closeWinEdit()">取消</button>
+      <button class="btn primary" type="button" onclick="saveWinEdit()">儲存修改</button>
+    </div>
+  </div>
+</div>
+
 </body></html>
