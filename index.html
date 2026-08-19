@@ -284,6 +284,36 @@
 .win-edit-actions .btn{flex:1}
 </style>
 
+
+<style id="win-image-order-style">
+.win-image-order-actions{
+  display:flex;
+  gap:6px;
+  padding:7px 8px 0;
+}
+.win-image-order-actions button{
+  flex:1;
+  border:1px solid #f1c8d8;
+  border-radius:9px;
+  background:#fff7fb;
+  color:#d83f7f;
+  padding:6px 8px;
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+.win-image-order-actions button:disabled{
+  opacity:.35;
+  cursor:default;
+}
+.win-image-index{
+  padding:5px 8px 0;
+  color:#9d7c89;
+  font-size:11px;
+  font-weight:800;
+}
+</style>
+
 </head><body>
 <div id="adminLogin">
   <div class="loginCard">
@@ -727,43 +757,118 @@ async function addWin(){
 
 
 let editingWinId=null;
+let editingWinImages=[];
+
+function renderEditWinImages(){
+  const box=$("editWinOldImages");
+
+  if(!box)return;
+
+  box.innerHTML=editingWinImages.length
+    ? editingWinImages.map((src,i)=>`
+        <div class="win-edit-image">
+          <img src="${E(src)}" alt="目前照片">
+
+          <div class="win-image-index">
+            第 ${i+1} 張
+          </div>
+
+          <div class="win-image-order-actions">
+            <button
+              type="button"
+              onclick="moveEditWinImage(${i},-1)"
+              ${i===0?"disabled":""}
+            >
+              ← 前移
+            </button>
+
+            <button
+              type="button"
+              onclick="moveEditWinImage(${i},1)"
+              ${i===editingWinImages.length-1?"disabled":""}
+            >
+              後移 →
+            </button>
+          </div>
+
+          <label>
+            <input
+              type="checkbox"
+              class="edit-remove-image"
+              value="${i}"
+            >
+            刪除此照片
+          </label>
+        </div>
+      `).join("")
+    : '<div class="muted">目前沒有照片</div>';
+}
+
+function moveEditWinImage(index,direction){
+  const target=index+Number(direction||0);
+
+  if(
+    target<0 ||
+    target>=editingWinImages.length
+  ){
+    return;
+  }
+
+  const copy=[...editingWinImages];
+
+  [
+    copy[index],
+    copy[target]
+  ]=[
+    copy[target],
+    copy[index]
+  ];
+
+  editingWinImages=copy;
+  renderEditWinImages();
+}
 
 function editWin(id){
-  const win=currentWins.find(x=>Number(x.id)===Number(id));
+  const win=currentWins.find(
+    x=>Number(x.id)===Number(id)
+  );
+
   if(!win){
     alert("找不到這筆喜報");
     return;
   }
 
   editingWinId=id;
+  editingWinImages=[
+    ...parseWinImages(
+      win.image_url
+    )
+  ];
 
-  $("editWinMember").value=win.member_display||"";
-  $("editWinAmount").value=win.amount||"";
-  $("editWinSortOrder").value=Number(win.sort_order||0);
+  $("editWinMember").value=
+    win.member_display||"";
+
+  $("editWinAmount").value=
+    win.amount||"";
+
+  $("editWinSortOrder").value=
+    Number(win.sort_order||0);
+
   $("editWinFiles").value="";
   $("editWinMsg").textContent="";
 
-  const images=parseWinImages(win.image_url);
-  const box=$("editWinOldImages");
+  renderEditWinImages();
 
-  box.innerHTML=images.length
-    ? images.map((src,i)=>`
-        <div class="win-edit-image">
-          <img src="${E(src)}" alt="目前照片">
-          <label>
-            <input type="checkbox" class="edit-remove-image" value="${i}">
-            刪除此照片
-          </label>
-        </div>
-      `).join("")
-    : '<div class="muted">目前沒有照片</div>';
-
-  $("winEditModal").classList.add("show");
+  $("winEditModal")
+    .classList.add("show");
 }
 
 function closeWinEdit(){
   editingWinId=null;
-  $("winEditModal").classList.remove("show");
+  editingWinImages=[];
+
+  $("winEditModal")
+    .classList.remove("show");
 }
 
 async function saveWinEdit(){
@@ -771,38 +876,65 @@ async function saveWinEdit(){
 
   try{
     if(!editingWinId){
-      throw new Error("找不到要編輯的紀錄");
+      throw new Error(
+        "找不到要編輯的紀錄"
+      );
     }
 
-    const win=currentWins.find(
-      x=>Number(x.id)===Number(editingWinId)
-    );
+    const member=
+      $("editWinMember")
+        .value
+        .trim();
 
-    if(!win){
-      throw new Error("找不到這筆喜報");
+    const amount=
+      Number(
+        $("editWinAmount").value||0
+      );
+
+    const sortOrder=
+      Number(
+        $("editWinSortOrder").value||0
+      );
+
+    if(!member){
+      throw new Error(
+        "請輸入會員顯示帳號"
+      );
     }
 
-    const member=$("editWinMember").value.trim();
-    const amount=Number($("editWinAmount").value||0);
-    const sortOrder=Number($("editWinSortOrder").value||0);
-
-    if(!member)throw new Error("請輸入會員顯示帳號");
-    if(!amount)throw new Error("請輸入贏得金額");
-
-    const oldImages=parseWinImages(win.image_url);
+    if(!amount){
+      throw new Error(
+        "請輸入贏得金額"
+      );
+    }
 
     const removeIndexes=[
-      ...document.querySelectorAll(".edit-remove-image:checked")
-    ].map(x=>Number(x.value));
-
-    const keptImages=oldImages.filter(
-      (_,i)=>!removeIndexes.includes(i)
+      ...document.querySelectorAll(
+        ".edit-remove-image:checked"
+      )
+    ].map(
+      x=>Number(x.value)
     );
 
-    const newFiles=[...($("editWinFiles").files||[])];
+    const keptImages=
+      editingWinImages.filter(
+        (_,i)=>
+          !removeIndexes.includes(i)
+      );
 
-    if(keptImages.length+newFiles.length>5){
-      throw new Error("同一筆喜報最多 5 張照片");
+    const newFiles=[
+      ...(
+        $("editWinFiles").files||[]
+      )
+    ];
+
+    if(
+      keptImages.length+
+      newFiles.length>5
+    ){
+      throw new Error(
+        "同一筆喜報最多 5 張照片"
+      );
     }
 
     msg.textContent=
@@ -823,18 +955,25 @@ async function saveWinEdit(){
       ...newImages
     ];
 
-    await A("/wins/"+editingWinId,{
-      method:"PATCH",
-      body:JSON.stringify({
-        member_display:member,
-        amount,
-        message:"使用此程式贏得",
-        sort_order:sortOrder,
-        image_url:finalImages.length
-          ? JSON.stringify(finalImages)
-          : ""
-      })
-    });
+    await A(
+      "/wins/"+editingWinId,
+      {
+        method:"PATCH",
+        body:JSON.stringify({
+          member_display:member,
+          amount,
+          message:
+            "使用此程式贏得",
+          sort_order:sortOrder,
+          image_url:
+            finalImages.length
+              ? JSON.stringify(
+                  finalImages
+                )
+              : ""
+        })
+      }
+    );
 
     closeWinEdit();
     await loadWins();
@@ -844,12 +983,17 @@ async function saveWinEdit(){
   }
 }
 
-document.addEventListener("click",(e)=>{
-  const modal=$("winEditModal");
-  if(e.target===modal){
-    closeWinEdit();
+document.addEventListener(
+  "click",
+  (e)=>{
+    const modal=
+      $("winEditModal");
+
+    if(e.target===modal){
+      closeWinEdit();
+    }
   }
-});
+);
 
 
 async function moveWin(id,direction){
