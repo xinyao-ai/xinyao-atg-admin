@@ -1108,8 +1108,7 @@ async function maintenanceRequest(method="GET",body=null){
   const data=await response.json().catch(()=>({}));
 
   if(response.status===401){
-    adminLogout(false);
-    throw new Error(data.message||"管理員登入已失效");
+    throw new Error(data.message||"維護權限驗證失敗");
   }
 
   if(!response.ok||!data?.ok){
