@@ -363,6 +363,7 @@
 
 <script>
 const API="https://xinyao-atg-admin-api.love06130430.workers.dev";
+const LIVE_API="https://xinyao-atg-live.love06130430.workers.dev";
 const $=id=>document.getElementById(id);
 const E=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const F=s=>s?new Date(s+"Z").toLocaleString("zh-TW",{hour12:false}):"—";
@@ -1042,14 +1043,133 @@ async function delWin(id){
   }
 }
 
+let maintenanceBusy=false;
+
+function maintenanceTime(value){
+  const n=Number(value||0);
+  if(!Number.isFinite(n)||n<=0)return "—";
+  return new Date(n).toLocaleString("zh-TW",{hour12:false});
+}
+
+function renderMaintenanceControl(state={},error=""){
+  const box=$("maintenanceControl");
+  if(!box)return;
+
+  if(error){
+    box.innerHTML=`
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">
+        <b>🛠️ 全站維護模式</b>
+        <div style="margin-top:10px;color:#e84c69;font-weight:800">讀取失敗：${E(error)}</div>
+      </div>`;
+    return;
+  }
+
+  const enabled=Boolean(state.enabled);
+  const message=String(state.message||"芯瑤 ATG 系統升級維護中，完成後將立即開放使用。");
+
+  box.innerHTML=`
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:16px;font-weight:900">🛠️ 全站維護模式</div>
+          <div style="margin-top:5px;font-size:13px;font-weight:900;color:${enabled?'#e84c69':'#24945b'}">
+            ${enabled?'🔴 目前：維護中':'🟢 目前：正常開放'}
+          </div>
+        </div>
+        <button class="btn ${enabled?'soft':'danger'}" type="button" onclick="setMaintenance(${enabled?'false':'true'})" ${maintenanceBusy?'disabled':''}>
+          ${maintenanceBusy?'處理中…':(enabled?'✅ 恢復正常使用':'🛠️ 開啟維護模式')}
+        </button>
+      </div>
+
+      <div style="margin-top:14px">
+        <div class="muted" style="margin-bottom:6px">會員看到的維護訊息</div>
+        <textarea id="maintenanceMessage" class="input" rows="4" style="width:100%;resize:vertical" maxlength="500">${E(message)}</textarea>
+      </div>
+
+      <div class="muted" style="margin-top:8px;line-height:1.6">
+        開啟後，會員網站與 ATG 即時助手會自動套用維護狀態；目前程式約每 10 秒檢查一次。<br>
+        最後更新：${maintenanceTime(state.updatedAt)}
+      </div>
+    </div>`;
+}
+
+async function maintenanceRequest(method="GET",body=null){
+  const token=sessionStorage.getItem("atg_admin_token")||"";
+  const headers={"Content-Type":"application/json"};
+  if(token)headers.Authorization="Bearer "+token;
+
+  const response=await fetch(LIVE_API+"/maintenance?t="+Date.now(),{
+    method,
+    cache:"no-store",
+    headers,
+    ...(body?{body:JSON.stringify(body)}:{})
+  });
+
+  const data=await response.json().catch(()=>({}));
+
+  if(response.status===401){
+    adminLogout(false);
+    throw new Error(data.message||"管理員登入已失效");
+  }
+
+  if(!response.ok||!data?.ok){
+    throw new Error(data.message||data.error||"維護狀態操作失敗");
+  }
+
+  return data;
+}
+
+async function loadMaintenance(){
+  try{
+    const data=await maintenanceRequest("GET");
+    renderMaintenanceControl(data);
+  }catch(e){
+    renderMaintenanceControl({},e.message||"讀取失敗");
+  }
+}
+
+async function setMaintenance(enabled){
+  if(maintenanceBusy)return;
+
+  const action=enabled?"開啟全站維護模式":"恢復正常使用";
+  if(!confirm(`確定要${action}？`))return;
+
+  const message=$("maintenanceMessage")?.value.trim()||"芯瑤 ATG 系統升級維護中，完成後將立即開放使用。";
+  maintenanceBusy=true;
+
+  try{
+    renderMaintenanceControl({
+      enabled:!enabled,
+      message,
+      updatedAt:Date.now()
+    });
+
+    await maintenanceRequest("POST",{enabled,message});
+    await loadMaintenance();
+    alert(enabled?"已開啟全站維護模式":"已恢復正常使用");
+  }catch(e){
+    alert(e.message||"操作失敗");
+    await loadMaintenance();
+  }finally{
+    maintenanceBusy=false;
+    await loadMaintenance();
+  }
+}
+
 async function health(){
   const box=$("systemBox");
+  if(!box)return;
+
+  let healthHtml="";
   try{
     await A("/health");
-    if(box)box.innerHTML="🟢 Worker：正常<br>🟢 D1：正常";
+    healthHtml="🟢 Worker：正常<br>🟢 D1：正常";
   }catch(e){
-    if(box)box.textContent="🔴 "+e.message;
+    healthHtml=`🔴 ${E(e.message||"系統狀態讀取失敗")}`;
   }
+
+  box.innerHTML=healthHtml+'<div id="maintenanceControl"><div class="muted" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">維護狀態讀取中...</div></div>';
+  await loadMaintenance();
 }
 
 async function refreshAll(){
