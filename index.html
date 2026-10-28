@@ -1465,30 +1465,32 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 <!-- 獨立輪播管理：保留舊後台一切功能 -->
 <style id="oracle-simple-carousel-style">
-#oracleAdminAddon:not(.active){display:none}
-#oracleAdminAddon .oc-wrap{max-width:1050px;background:#0b2024;border:1px solid #c4a35b;border-radius:18px;padding:20px;color:#f3dca9}
-#oracleAdminAddon h3{margin:0 0 8px;font-size:23px}
-#oracleAdminAddon .oc-hint{font-size:13px;color:#cabca1;line-height:1.7}
-#oracleAdminAddon .oc-sizes{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 18px}
-#oracleAdminAddon .oc-sizes span{padding:10px 14px;background:#112d31;border:1px solid #806d40;border-radius:9px}
-#oracleAdminAddon button{cursor:pointer;border-radius:10px;border:1px solid #c7a45b;background:#1e3437;color:#f4d89d;padding:10px 15px;font-weight:800}
-#oracleAdminAddon .oc-publish{background:linear-gradient(135deg,#bd8d36,#e8c477);color:#1b170f}
-#oracleAdminAddon .oc-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}
-#oracleAdminAddon .oc-row{border:1px solid #927b4e;background:#10272a;border-radius:15px;margin:14px 0;padding:15px;display:grid;gap:13px}
-#oracleAdminAddon .oc-row-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-#oracleAdminAddon .oc-row-top strong{margin-right:auto}
-#oracleAdminAddon label{display:grid;gap:7px;font-size:14px;font-weight:700}
-#oracleAdminAddon .oc-check{display:flex;align-items:center;gap:8px}
-#oracleAdminAddon input[type="text"],#oracleAdminAddon input[type="password"],#oracleAdminAddon input[type="url"]{width:100%;padding:11px;border-radius:9px;border:1px solid #a68f5b;background:#fffefa;color:#222;font-size:15px}
-#oracleAdminAddon input[type="file"]{max-width:100%;font-size:13px}
-#oracleAdminAddon .oc-images{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-#oracleAdminAddon .oc-image{min-width:0;display:grid;gap:6px}
-#oracleAdminAddon .oc-preview{width:100%;aspect-ratio:2.5/1;object-fit:contain;background:#08191c;border:1px dashed #826f47;border-radius:9px}
-#oracleAdminAddon .oc-empty{display:flex;align-items:center;justify-content:center;aspect-ratio:2.5/1;border:1px dashed #826f47;border-radius:9px;color:#9d927d;font-weight:400}
-#oracleAdminAddon details{margin-top:22px;border-top:1px solid #756646;padding-top:15px}
-#oracleAdminAddon summary{cursor:pointer;color:#e4c882;font-weight:800}
-#oracleAdminAddon #ocStatus{font-size:13px;color:#e6d2a0;white-space:pre-wrap}
-@media(max-width:700px){#oracleAdminAddon .oc-images{grid-template-columns:1fr}#oracleAdminAddon .oc-wrap{padding:13px}}
+#oracleSimpleCarousel:not(.active){display:none}
+#oracleSimpleCarousel .oc-wrap{box-shadow:0 12px 34px #07141820;max-width:1050px;background:#0b2024;border:1px solid #c4a35b;border-radius:18px;padding:20px;color:#f3dca9}
+#oracleSimpleCarousel h3{margin:0 0 8px;font-size:23px}
+#oracleSimpleCarousel .oc-hint{font-size:13px;color:#cabca1;line-height:1.7}
+#oracleSimpleCarousel .oc-sizes{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 18px}
+#oracleSimpleCarousel .oc-sizes span{padding:10px 14px;background:#112d31;border:1px solid #806d40;border-radius:9px}
+#oracleSimpleCarousel button{cursor:pointer;border-radius:10px;border:1px solid #c7a45b;background:#1e3437;color:#f4d89d;padding:10px 15px;font-weight:800}
+#oracleSimpleCarousel .oc-publish{background:linear-gradient(135deg,#bd8d36,#e8c477);color:#1b170f}
+#oracleSimpleCarousel .oc-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}
+#oracleSimpleCarousel .oc-row{border:1px solid #927b4e;background:#10272a;border-radius:15px;margin:14px 0;padding:15px;display:grid;gap:13px}
+#oracleSimpleCarousel .oc-row-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#oracleSimpleCarousel .oc-row-top strong{margin-right:auto}
+#oracleSimpleCarousel label{display:grid;gap:7px;font-size:14px;font-weight:700}
+#oracleSimpleCarousel .oc-check{display:flex;align-items:center;gap:8px}
+#oracleSimpleCarousel input[type="text"],#oracleSimpleCarousel input[type="password"],#oracleSimpleCarousel input[type="url"]{width:100%;padding:11px;border-radius:9px;border:1px solid #a68f5b;background:#fffefa;color:#222;font-size:15px}
+#oracleSimpleCarousel input[type="file"]{max-width:100%;font-size:13px;color:#f3dca9;padding:9px;border:1px solid #877149;border-radius:9px;background:#142d32}
+#oracleSimpleCarousel .oc-preview[hidden]{display:none!important}
+#oracleSimpleCarousel .oc-images{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#oracleSimpleCarousel .oc-image{min-width:0;display:grid;gap:6px}
+#oracleSimpleCarousel .oc-preview:not([hidden]){width:100%;aspect-ratio:2.5/1;object-fit:contain;background:#08191c;border:1px dashed #826f47;border-radius:9px}
+#oracleSimpleCarousel .oc-empty{display:flex;align-items:center;justify-content:center;aspect-ratio:2.5/1;border:1px dashed #826f47;border-radius:9px;color:#9d927d;font-weight:400}
+#oracleSimpleCarousel details{margin-top:22px;border-top:1px solid #756646;padding-top:15px}
+#oracleSimpleCarousel summary{cursor:pointer;color:#e4c882;font-weight:800}
+#oracleSimpleCarousel #ocStatus{font-size:13px;color:#e6d2a0;white-space:pre-wrap}
+@media(max-width:700px){#oracleSimpleCarousel .oc-preview[hidden]{display:none!important}
+#oracleSimpleCarousel .oc-images{grid-template-columns:1fr}#oracleSimpleCarousel .oc-wrap{box-shadow:0 12px 34px #07141820;padding:13px}}
 </style>
 <script id="oracle-simple-carousel-js">
 (function(){
