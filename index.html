@@ -1462,4 +1462,60 @@ document.addEventListener("DOMContentLoaded",()=>{
   </div>
 </div>
 
+
+<!-- 賽特神諭：獨立輪播管理擴充。貼在原後台 index.html 的 </body> 前。 -->
+<style id="oracle-admin-addon-css">
+#oracleAdminAddon:not(.active){display:none}.oracle-manager-panel{padding:18px;border:1px solid #d3ad66;border-radius:18px;background:#0b2024;color:#efd5a0;max-width:1020px}
+.oracle-manager-panel h3{margin:0 0 10px}.oracle-manager-panel p{color:#d3c4aa}.oracle-manager-panel input{border:1px solid #bfab7e;border-radius:8px;padding:9px;background:#fff;color:#222;width:100%;min-width:0}
+.oracle-manager-panel button{cursor:pointer;border-radius:9px;border:1px solid #c6a15c;padding:9px 12px;background:#1b3235;color:#f0d49a;font-weight:700}
+.oracle-manager-panel .action{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.oracle-manager-panel .size{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.oracle-manager-panel .size>div{border:1px solid #ad905f;border-radius:10px;padding:10px}.oracle-manager-panel .size b{display:block;font-size:20px;margin-top:4px}
+.oracle-slide-editor-card{display:grid;gap:8px;padding:12px;margin-top:12px;border:1px solid #af9157;border-radius:12px}
+.oracle-slide-editor-card label{display:grid;gap:5px}.oracle-slide-editor-card .files,.oracle-slide-editor-card .urls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.oracle-slide-editor-card img{width:100%;aspect-ratio:2.6/1;object-fit:contain;background:#09171c;border:1px dashed #927446}
+@media(max-width:700px){.oracle-manager-panel .size,.oracle-slide-editor-card .files,.oracle-slide-editor-card .urls{grid-template-columns:1fr}}
+</style>
+<script id="oracle-admin-addon-js">
+(() => {
+ const $=id=>document.getElementById(id);
+ const api='https://api.github.com/repos/xinyao-ai/xinyao-ai/contents/';
+ const published='https://xinyao-ai.github.io/xinyao-ai/carousel-config.json';
+ let slides=[],busy=false;
+ const message=t=>{const n=$('oracleAdminStatus');if(n)n.textContent=t};
+ const escape=s=>String(s||'').replace(/[&<>"']/g,k=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[k]));
+ const b64=s=>btoa(Array.from(new TextEncoder().encode(s),x=>String.fromCharCode(x)).join(''));
+ const token=()=>($('oracleAdminToken')?.value||'').trim();
+ async function request(path,method='GET',body){
+   if(!token())throw Error('請先輸入 GitHub fine-grained token');
+   const r=await fetch(api+path,{method,headers:{Authorization:'Bearer '+token(),Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+   const j=await r.json().catch(()=>({}));if(!r.ok)throw Error('GitHub '+r.status+': '+(j.message||'操作失敗'));return j;
+ }
+ function paint(){const box=$('oracleAdminSlides');if(!box)return;box.replaceChildren();
+   for(const [i,s] of slides.entries()){
+    const card=document.createElement('div');card.className='oracle-slide-editor-card';
+    card.innerHTML=`<div class="action"><strong>第 ${i+1} 張</strong><button data-act="up">↑ 上移</button><button data-act="down">↓ 下移</button><button data-act="del">刪除</button></div><label>標題<input data-key="title" value="${escape(s.title)}"></label><label>點擊網址（選填）<input data-key="link" value="${escape(s.link)}" placeholder="https://..."></label><label><input data-key="enabled" type="checkbox" style="width:auto" ${s.enabled?'checked':''}> 啟用輪播</label><div class="files"><label>電腦圖 1920 × 660<input data-file="desktop" type="file" accept="image/png,image/jpeg,image/webp"><img data-preview="desktop" alt="電腦版預覽"></label><label>手機圖 1200 × 490<input data-file="mobile" type="file" accept="image/png,image/jpeg,image/webp"><img data-preview="mobile" alt="手機版預覽"></label></div><div class="urls"><label>電腦圖片網址<input data-key="desktop" value="${escape(s.desktop)}"></label><label>手機圖片網址<input data-key="mobile" value="${escape(s.mobile)}"></label></div>`;
+    card.querySelectorAll('[data-key]').forEach(input=>input.addEventListener('input',()=>{s[input.dataset.key]=input.type==='checkbox'?input.checked:input.value;if(['desktop','mobile'].includes(input.dataset.key))preview()}));
+    card.querySelectorAll('[data-file]').forEach(input=>input.addEventListener('change',()=>{const file=input.files?.[0];if(!file)return;if(file.size>4*1024*1024){message('單張圖片請小於 4MB');input.value='';return} s['_'+input.dataset.file]=file;preview()}));
+    function preview(){for(const type of ['desktop','mobile']){const img=card.querySelector('[data-preview="'+type+'"]');if(img.dataset.url)URL.revokeObjectURL(img.dataset.url);img.dataset.url=s['_'+type]?URL.createObjectURL(s['_'+type]):'';const url=img.dataset.url||s[type];if(url)img.src=url;else img.removeAttribute('src')}}
+    card.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.act==='del'){if(confirm('確定刪除第 '+(i+1)+' 張？'))slides.splice(i,1)}else if(b.dataset.act==='up'&&i>0){[slides[i-1],slides[i]]=[slides[i],slides[i-1]]}else if(b.dataset.act==='down'&&i<slides.length-1){[slides[i],slides[i+1]]=[slides[i+1],slides[i]]}paint()}));
+    preview();box.appendChild(card);
+   }
+   if(!slides.length)box.textContent='目前沒有輪播圖，按新增開始。';
+ }
+ async function load(){try{const r=await fetch(published+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('讀取失敗');const j=await r.json();slides=(Array.isArray(j.slides)?j.slides:[]).map((x,i)=>({id:String(x.id||i),title:x.title||'',link:x.link||'',desktop:x.desktop||'',mobile:x.mobile||'',enabled:x.enabled!==false}));paint();message('讀取完成，共 '+slides.length+' 張')}catch(e){message(e.message)}}
+ async function upload(file,name){const encoded=await new Promise((resolve,reject)=>{const fr=new FileReader;fr.onload=()=>resolve(String(fr.result).split(',')[1]);fr.onerror=()=>reject(Error('讀圖失敗'));fr.readAsDataURL(file)});await request('assets/carousel/'+name,'PUT',{message:'Add carousel image',branch:'main',content:encoded});return 'https://xinyao-ai.github.io/xinyao-ai/assets/carousel/'+name}
+ async function publish(){if(busy)return;if(!token()){message('請輸入 GitHub token');return}if(slides.some(s=>!s.desktop&&!s._desktop)){message('每張都需要電腦圖');return}if(slides.some(s=>s.link && !/^https:\/\//i.test(s.link))){message('點擊網址請使用 https://');return}if(!confirm('確定發佈到正式版？'))return;busy=true;
+  try{for(let i=0;i<slides.length;i++){const s=slides[i];for(const side of ['desktop','mobile']){if(!s['_'+side])continue;const file=s['_'+side],ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';message('上傳第 '+(i+1)+' 張 '+side+'...');s[side]=await upload(file,Date.now()+'-'+i+'-'+side+'.'+ext);delete s['_'+side]}}
+  const previous=await request('carousel-config.json?ref=main');const config={version:1,intervalMs:6500,slides:slides.map(x=>({id:x.id,title:x.title,link:x.link,desktop:x.desktop,mobile:x.mobile,enabled:x.enabled}))};await request('carousel-config.json','PUT',{message:'Publish homepage carousel',branch:'main',sha:previous.sha,content:b64(JSON.stringify(config,null,2)+'\n')});message('✅ 發佈成功，等待 GitHub Pages 更新');paint();
+  }catch(e){message('❌ '+e.message)}finally{busy=false}}
+ function init(){const nav=document.querySelector('nav.nav');const main=document.querySelector('main.main');if(!nav||!main)return;
+  const btn=document.createElement('button');btn.type='button';btn.dataset.tab='oracleAdminAddon';btn.textContent='🖼️ 輪播圖管理';nav.appendChild(btn);
+  const section=document.createElement('section');section.id='oracleAdminAddon';section.className='panel';section.innerHTML=`<div class="oracle-manager-panel"><h3>🖼️ 輪播圖管理</h3><p>這是獨立新增的功能，原本會員管理、維護與其他設定不變。</p><div class="size"><div>電腦版<b>1920 × 660 px</b>比例 2.91:1</div><div>手機版<b>1200 × 490 px</b>比例 2.45:1</div></div><p>請使用 PNG、JPG 或 WebP；圖片建議 4 MB 以下，手機圖可留空。GitHub Token 不會寫進程式檔案，也不會儲存於瀏覽器。</p><label>GitHub fine-grained Token<input id="oracleAdminToken" type="password" autocomplete="off" placeholder="授予 xinyao-ai/xinyao-ai Contents: Read and write"></label><div class="action"><button id="oracleAdminReload" type="button">重新讀取</button><button id="oracleAdminAdd" type="button">＋ 新增圖片</button><button id="oracleAdminPublish" type="button">發布輪播圖</button></div><p id="oracleAdminStatus" role="status"></p><div id="oracleAdminSlides"></div></div>`;
+  main.appendChild(section);$('oracleAdminReload').onclick=load;$('oracleAdminAdd').onclick=()=>{slides.push({id:'slide-'+Date.now()+'-'+Math.random().toString(36).slice(2),title:'',link:'',desktop:'',mobile:'',enabled:true});paint()};$('oracleAdminPublish').onclick=publish;
+  btn.addEventListener('click',()=>{const title=$('title');if(title)title.textContent='輪播圖管理';load()});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
 </body></html>
