@@ -314,7 +314,24 @@
 }
 </style>
 
-</head><body>
+
+<style id="oracle-telemetry-style">
+#telemetry{--gold:#f4c96e;--edge:#5b4827;color:#f5ebd6}
+#telemetry .tm-panel{background:linear-gradient(145deg,#17201f,#0d1516);border:1px solid var(--edge);border-radius:15px;padding:16px;margin:12px 0}
+#telemetry .tm-filter{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+#telemetry .tm-filter input,#telemetry .tm-filter select{background:#111b1c;color:#f7e7c4;border:1px solid #755d37;padding:10px;border-radius:9px}
+#telemetry .tm-filter button{background:#eec36a;color:#18201b;border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer}
+#telemetry .tm-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px}
+#telemetry .tm-card{background:#192526;border:1px solid #4b422e;border-radius:12px;padding:14px}
+#telemetry .tm-card small{color:#ccba94;display:block}#telemetry .tm-card strong{font-size:24px;display:block;margin-top:7px;color:#ffe0a0}
+#telemetry h3{color:#f4c96e;margin:0 0 12px}
+#telemetry table{min-width:950px}#telemetry th{color:#edc86f;background:#202a28}#telemetry td{color:#f2e9d4}#telemetry th,#telemetry td{border-bottom:1px solid #38413a}
+#telemetry .tm-note{color:#d2c09b;font-size:13px;line-height:1.7}
+#telemetry .tm-scroll{overflow:auto;max-height:460px}
+#telemetry .tm-bars{display:grid;grid-template-columns:repeat(24,minmax(18px,1fr));gap:4px;align-items:end;height:150px;min-width:530px}
+#telemetry .tm-bar{background:linear-gradient(#ffde85,#87652f);min-height:2px;border-radius:4px 4px 0 0}
+#telemetry .tm-chart-labels{display:grid;grid-template-columns:repeat(24,1fr);gap:4px;min-width:530px;font-size:10px;color:#b8a887;text-align:center}
+</style></head><body>
 <div id="adminLogin">
   <div class="loginCard">
     <div class="loginLogo">💕</div>
@@ -327,7 +344,7 @@
   </div>
 </div>
 <div class="app"><aside class="side"><div class="brand">💕 芯瑤 ATG 後台</div><nav class="nav">
-<button class="active" data-tab="overview">📊 總覽</button><button data-tab="members">👥 會員管理</button><button data-tab="detail">🪪 會員詳細</button><button data-tab="kick">🚪 強制登出</button><button data-tab="batch">➕ 批次新增</button><button data-tab="wins">🎉 恭喜會員</button><button data-tab="system">🟢 系統狀態</button><button data-tab="logs">🧾 操作紀錄</button><button data-tab="activity">👀 上線／操作</button></nav></aside>
+<button class="active" data-tab="overview">📊 總覽</button><button data-tab="members">👥 會員管理</button><button data-tab="detail">🪪 會員詳細</button><button data-tab="kick">🚪 強制登出</button><button data-tab="batch">➕ 批次新增</button><button data-tab="wins">🎉 恭喜會員</button><button data-tab="system">🟢 系統狀態</button><button data-tab="logs">🧾 操作紀錄</button><button data-tab="activity">👀 上線／操作</button><button data-tab="telemetry">👁️ 遊戲數據監測</button></nav></aside>
 <main class="main"><div class="top"><h2 id="title">總覽儀表板</h2><div class="row"><button class="btn soft" onclick="refreshAll()">↻ 更新</button><button id="logoutBtn" class="btn danger" onclick="adminLogout()">登出</button></div></div>
 <section id="overview" class="panel active"><div class="stats"><div class="card stat"><span class="muted">會員總數</span><b id="total">—</b></div><div class="card stat"><span class="muted">正常會員</span><b id="active">—</b></div><div class="card stat"><span class="muted">停用會員</span><b id="disabled">—</b></div><div class="card stat"><span class="muted">目前上線</span><b id="online">—</b></div><div class="card stat"><span class="muted">今日新增</span><b id="today_new">—</b></div></div><div class="card"><b>最近會員操作</b><div id="recent" class="muted">載入中...</div></div></section>
 <section id="members" class="panel"><div class="card"><div class="row"><input id="search" class="input" placeholder="搜尋會員"><button class="btn soft" onclick="loadMembers()">搜尋</button><input id="newAccount" class="input" placeholder="新增會員帳號"><button class="btn primary" onclick="addMember()">新增會員</button></div><div id="memberMsg"></div><div class="table"><table><thead><tr><th>ID</th><th>帳號</th><th>狀態</th><th>最後登入</th><th>最後活動</th><th>到期日</th><th>操作</th></tr></thead><tbody id="memberRows"></tbody></table></div></div></section>
@@ -359,7 +376,42 @@
 <section id="system" class="panel"><div class="card" id="systemBox">檢查中...</div></section>
 <section id="logs" class="panel"><div class="card"><div class="table"><table><thead><tr><th>時間</th><th>管理員</th><th>操作</th><th>對象</th><th>內容</th></tr></thead><tbody id="logRows"></tbody></table></div></div></section>
 <section id="activity" class="panel"><div class="card"><div class="table"><table><thead><tr><th>時間</th><th>會員</th><th>操作</th><th>內容</th><th>裝置</th></tr></thead><tbody id="activityRows"></tbody></table></div></div></section>
-</main></div>
+
+<section id="telemetry" class="panel">
+ <div class="tm-panel">
+  <h3>👁️ 遊戲數據監測｜會員實測紀錄</h3>
+  <p class="tm-note">僅統計有來源的遊戲事件。APP 尚未上傳或雲端 API 尚未啟用時，不會產生虛構數據。資料顯示需會員知情同意，且不得將樣本推算為 ATG 全體玩家。</p>
+  <div class="tm-filter">
+    <select id="tmPeriod" aria-label="分析時間"><option value="24">最近 24 小時</option><option value="168">最近 7 天</option><option value="720">最近 30 天</option><option value="0">全部紀錄</option></select>
+    <input id="tmMember" placeholder="搜尋會員帳號" aria-label="會員帳號">
+    <input id="tmGame" placeholder="搜尋遊戲／房號" aria-label="遊戲或房號">
+    <button type="button" onclick="tmRender()">套用篩選</button>
+    <button type="button" onclick="tmFetch()">重新取得雲端資料</button>
+  </div>
+  <p id="tmStatus" class="tm-note">請登入管理員後載入資料。</p>
+ </div>
+ <div class="tm-cards">
+  <div class="tm-card"><small>有效紀錄</small><strong id="tmCount">—</strong></div>
+  <div class="tm-card"><small>有紀錄會員</small><strong id="tmUsers">—</strong></div>
+  <div class="tm-card"><small>投注金額合計（點）</small><strong id="tmBets">—</strong></div>
+  <div class="tm-card"><small>派彩金額合計（點）</small><strong id="tmPayout">—</strong></div>
+  <div class="tm-card"><small>淨收益（派彩－投注）</small><strong id="tmNet">—</strong></div>
+  <div class="tm-card"><small>明確標記免遊購買</small><strong id="tmBuys">—</strong></div>
+  <div class="tm-card"><small>高額派彩事件（≥50,000）</small><strong id="tmHigh">—</strong></div>
+ </div>
+ <div class="tm-panel">
+  <h3>📈 24 小時派彩事件分布</h3>
+  <div style="overflow-x:auto"><div id="tmBars" class="tm-bars"></div><div id="tmBarLabels" class="tm-chart-labels"></div></div>
+  <p class="tm-note">以台灣時間統計事件發生的小時；顯示樣本事件次數，不代表下一局中獎機率。</p>
+ </div>
+ <div class="tm-panel"><h3>🏆 房號／爆分排行（按單筆派彩）</h3><div class="tm-scroll"><table><thead><tr><th>時間</th><th>會員</th><th>遊戲</th><th>房號</th><th>下注（點）</th><th>派彩（點）</th><th>淨收益（點）</th></tr></thead><tbody id="tmTop"></tbody></table></div></div>
+ <div class="tm-panel"><h3>🎮 會員事件明細</h3><div class="tm-scroll"><table><thead><tr><th>時間</th><th>會員</th><th>遊戲</th><th>房號</th><th>事件</th><th>下注（點）</th><th>派彩（點）</th><th>免遊購買次數</th></tr></thead><tbody id="tmRows"></tbody></table></div></div>
+ <div class="tm-panel"><h3>📁 匯入真實紀錄（CSV）</h3>
+  <p class="tm-note">目前可匯入你已授權取得的遊戲紀錄 CSV，在這台瀏覽器暫時分析，不會自動上傳或存入 GitHub。欄位格式：<code>time,member,game,room,bet,payout,type,free_buy_count</code>；type 可用 <code>spin</code> 或 <code>free_buy</code>。請勿包含密碼、Cookie 或 Token。</p>
+  <input id="tmCsv" type="file" accept=".csv,text/csv" style="color:#eed5a2"><button type="button" class="btn soft" onclick="tmClearImport()">清除匯入資料</button>
+  <p id="tmCsvStatus" class="tm-note"></p>
+ </div>
+</section></main></div>
 
 <script>
 const API="https://xinyao-atg-admin-api.love06130430.workers.dev";
@@ -401,7 +453,8 @@ const titles={
   wins:"恭喜會員紀錄",
   system:"系統狀態",
   logs:"操作紀錄",
-  activity:"會員上線／操作紀錄"
+  activity:"會員上線／操作紀錄",
+  telemetry:"遊戲數據監測"
 };
 
 document.addEventListener("click",e=>{
@@ -421,6 +474,7 @@ document.addEventListener("click",e=>{
   if(b.dataset.tab==="wins")loadWins();
   if(b.dataset.tab==="logs")loadLogs();
   if(b.dataset.tab==="activity")loadActivity();
+  if(b.dataset.tab==="telemetry")tmFetch();
   if(b.dataset.tab==="system")health();
 });
 
@@ -1534,4 +1588,75 @@ document.addEventListener("DOMContentLoaded",()=>{
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
-</body></html>
+
+<script id="oracle-telemetry-script">
+let tmCloud=[],tmImported=[];
+const tmNum=x=>{if(x===null||x===undefined||x==="")return null;const n=Number(String(x).replace(/,/g,""));return Number.isFinite(n)&&n>=0?n:null};
+const tmMoney=x=>x===null?"—":Number(x).toLocaleString("zh-TW",{maximumFractionDigits:2});
+const tmDate=x=>{const d=new Date(x);return Number.isFinite(d.getTime())?d:null};
+const tmFmt=x=>{const d=tmDate(x);return d?d.toLocaleString("zh-TW",{timeZone:"Asia/Taipei",hour12:false}):"—"};
+function tmNormalize(raw){
+ if(!raw||typeof raw!=="object")return null;
+ const time=raw.time??raw.created_at??raw.timestamp;
+ const date=tmDate(time);
+ if(!date)return null;
+ const count=tmNum(raw.free_buy_count??raw.freeBuyCount);
+ const type=String(raw.type??raw.event_type??raw.event??"spin").toLowerCase();
+ return {time:date.toISOString(),member:String(raw.member??raw.account??"未知"),game:String(raw.game??raw.game_name??"未知"),room:String(raw.room??raw.room_id??"—"),bet:tmNum(raw.bet??raw.stake),payout:tmNum(raw.payout??raw.latestPayout),type,freeBuyCount:count};
+}
+function tmRecords(){
+ const hrs=Number(document.getElementById("tmPeriod").value);
+ const member=document.getElementById("tmMember").value.trim().toLowerCase();
+ const game=document.getElementById("tmGame").value.trim().toLowerCase();
+ const since=hrs?Date.now()-hrs*3600000:0;
+ return [...tmCloud,...tmImported].filter(x=>Date.parse(x.time)>=since&&x.member.toLowerCase().includes(member)&&(x.game+" "+x.room).toLowerCase().includes(game)).sort((a,b)=>Date.parse(b.time)-Date.parse(a.time));
+}
+function tmRender(){
+ const a=tmRecords(),sum=k=>a.reduce((n,r)=>n+(r[k]??0),0);
+ const buys=a.reduce((n,r)=>n+(r.freeBuyCount??(r.type==="free_buy"?1:0)),0);
+ const bet=sum("bet"),payout=sum("payout");
+ for(const [id,v] of Object.entries({tmCount:a.length,tmUsers:new Set(a.map(x=>x.member)).size,tmBets:bet,tmPayout:payout,tmNet:payout-bet,tmBuys:buys,tmHigh:a.filter(x=>(x.payout??0)>=50000).length})){
+  document.getElementById(id).textContent=tmMoney(v);
+ }
+ const html=(x,top)=>"<tr><td>"+tmFmt(x.time)+"</td><td>"+E(x.member)+"</td><td>"+E(x.game)+"</td><td>"+E(x.room)+"</td>"+(top?"":"<td>"+E(x.type)+"</td>")+"<td>"+tmMoney(x.bet)+"</td><td>"+tmMoney(x.payout)+"</td><td>"+(top?tmMoney(x.bet!==null&&x.payout!==null?x.payout-x.bet:null):tmMoney(x.freeBuyCount??(x.type==="free_buy"?1:0)))+"</td></tr>";
+ document.getElementById("tmRows").innerHTML=a.slice(0,500).map(x=>html(x,false)).join("")||'<tr><td colspan="8">沒有符合條件的真實紀錄</td></tr>';
+ document.getElementById("tmTop").innerHTML=a.filter(x=>x.payout!==null).sort((x,y)=>y.payout-x.payout).slice(0,10).map(x=>html(x,true)).join("")||'<tr><td colspan="7">沒有可供排名的派彩紀錄</td></tr>';
+ const counts=Array(24).fill(0);
+ a.forEach(x=>{let h=Number(new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Taipei",hour:"numeric",hourCycle:"h23"}).format(new Date(x.time)));if(h>=0&&h<24)counts[h]++});
+ const max=Math.max(1,...counts);
+ document.getElementById("tmBars").innerHTML=counts.map((n,i)=>'<div class="tm-bar" title="'+i+':00：'+n+' 次" style="height:'+Math.max(2,n/max*145)+'px"></div>').join("");
+ document.getElementById("tmBarLabels").innerHTML=counts.map((n,i)=>"<span>"+String(i).padStart(2,"0")+"</span>").join("");
+}
+async function tmFetch(){
+ const status=document.getElementById("tmStatus");
+ status.textContent="正在檢查遊戲事件資料接口…";
+ try{
+  const d=await A("/admin/game-events?limit=5000");
+  const source=Array.isArray(d.events)?d.events:Array.isArray(d.records)?d.records:null;
+  if(!source)throw new Error("API 未回傳事件陣列");
+  tmCloud=source.map(tmNormalize).filter(Boolean);
+  status.textContent="雲端載入完成："+tmCloud.length+" 筆有效遊戲紀錄。";
+ }catch(e){
+  tmCloud=[];
+  status.textContent="⚠️ 雲端遊戲紀錄尚未接通（"+e.message+"）。後台頁面已就緒；需另行部署授權的遊戲事件上傳／查詢 API。匯入 CSV 仍可使用。";
+ }
+ tmRender();
+}
+function tmCsvParse(txt){
+ const lines=txt.replace(/^\uFEFF/,"").split(/\r?\n/).filter(x=>x.trim());
+ const parse=line=>{const a=[];let v="",q=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'&&q&&line[i+1]==='"'){v+='"';i++}else if(c==='"')q=!q;else if(c===","&&!q){a.push(v);v=""}else v+=c}a.push(v);return a};
+ if(lines.length<2)return [];
+ const keys=parse(lines[0]).map(x=>x.trim());
+ return lines.slice(1).map(line=>Object.fromEntries(parse(line).map((v,i)=>[keys[i],v]))).map(tmNormalize).filter(Boolean);
+}
+function tmClearImport(){tmImported=[];document.getElementById("tmCsv").value="";document.getElementById("tmCsvStatus").textContent="已清除本次匯入紀錄";tmRender()}
+document.addEventListener("DOMContentLoaded",()=>{
+ document.getElementById("tmCsv")?.addEventListener("change",async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  if(file.size>5*1024*1024){document.getElementById("tmCsvStatus").textContent="檔案超過 5MB，請分批匯入";return}
+  try{tmImported=tmCsvParse(await file.text());document.getElementById("tmCsvStatus").textContent="匯入有效紀錄："+tmImported.length+" 筆（重新整理頁面即清除）";tmRender()}
+  catch(err){document.getElementById("tmCsvStatus").textContent="匯入失敗："+err.message}
+ });
+ tmRender();
+});
+</script></body></html>
