@@ -1631,7 +1631,13 @@ async function tmFetch(){
  const status=document.getElementById("tmStatus");
  status.textContent="正在檢查遊戲事件資料接口…";
  try{
-  const d=await A("/admin/game-events?limit=5000");
+  const token=sessionStorage.getItem("atg_admin_token")||"";
+  if(!token)throw new Error("請先登入管理後台");
+  const response=await fetch(LIVE_API+"/admin/game-events?limit=5000",{
+    headers:{Authorization:"Bearer "+token},cache:"no-store"
+  });
+  const d=await response.json().catch(()=>({}));
+  if(!response.ok||!d.ok)throw new Error(d.error||"遊戲資料查詢失敗");
   const source=Array.isArray(d.events)?d.events:Array.isArray(d.records)?d.records:null;
   if(!source)throw new Error("API 未回傳事件陣列");
   tmCloud=source.map(tmNormalize).filter(Boolean);
