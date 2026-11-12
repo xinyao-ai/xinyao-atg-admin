@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>芯瑤💕ATG 管理後台</title>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>賽特神諭👁️ATG 管理後台</title>
 <style>
 :root{--p:#ef4d91;--bg:#fff6fa;--line:#f2dbe6;--muted:#8b7882;--red:#e84c69}*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft JhengHei",sans-serif;background:var(--bg);color:#302830}.app{display:grid;grid-template-columns:235px 1fr;min-height:100vh}.side{background:#fff;padding:20px 14px;border-right:1px solid var(--line)}.brand{font-size:19px;font-weight:900;padding:10px}.nav{display:grid;gap:7px}.nav button{border:0;background:transparent;padding:12px;text-align:left;border-radius:12px;font-weight:800}.nav button.active{background:linear-gradient(135deg,#ff91bc,var(--p));color:#fff}.main{padding:22px}.top{display:flex;justify-content:space-between;align-items:center}.panel{display:none}.panel.active{display:block}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 10px 30px #d9548b10}.stat b{display:block;font-size:28px;margin-top:6px}.muted{font-size:12px;color:var(--muted)}.row{display:flex;gap:8px;flex-wrap:wrap}.input,select,textarea{border:1px solid var(--line);border-radius:11px;padding:10px;background:#fffafd}.btn{border:0;border-radius:11px;padding:10px 12px;font-weight:850;cursor:pointer}.primary{background:var(--p);color:#fff}.soft{background:#fff0f6;color:#d83d7d}.danger{background:var(--red);color:#fff}.table{overflow:auto;border:1px solid var(--line);border-radius:13px;margin-top:12px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:10px;border-bottom:1px solid #f6e8ee;text-align:left;font-size:13px}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.win{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}.win img{max-width:180px;max-height:130px;border-radius:9px;display:block;margin-top:8px}@media(max-width:850px){.app{grid-template-columns:1fr}.nav{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.main{padding:14px}}
 </style>
@@ -331,11 +331,53 @@
 #telemetry .tm-bars{display:grid;grid-template-columns:repeat(24,minmax(18px,1fr));gap:4px;align-items:end;height:150px;min-width:530px}
 #telemetry .tm-bar{background:linear-gradient(#ffde85,#87652f);min-height:2px;border-radius:4px 4px 0 0}
 #telemetry .tm-chart-labels{display:grid;grid-template-columns:repeat(24,1fr);gap:4px;min-width:530px;font-size:10px;color:#b8a887;text-align:center}
-</style></head><body>
+</style>
+<style id="seth-oracle-admin-gold-theme">
+/* 賽特神諭後台：視覺覆蓋層，不更動會員資料、事件或 API */
+:root{--p:#f5c84b;--bg:#090e13;--line:#8b7038;--muted:#b8a985;--red:#d96565;color-scheme:dark}
+html,body{background:#090e13!important;color:#f4e7c9!important}
+body{background:radial-gradient(ellipse at 55% 0%,#19241f 0%,#0c1215 53%,#070b0f 100%)!important}
+.side{background:linear-gradient(180deg,#101b1f,#090f13)!important;border-right:1px solid #785d2f!important;box-shadow:3px 0 25px #0005}
+.brand{color:#f4cb60!important;text-shadow:0 0 15px #b78c3933}
+.nav button{color:#dfd1ad!important}
+.nav button:hover{background:#263029!important;color:#ffe49b!important}
+.nav button.active{background:linear-gradient(110deg,#ffe28a,#e8b846 57%,#b98425)!important;color:#1a160c!important;box-shadow:0 4px 17px #c8994140}
+.main,.top,.panel{color:#f0e1c2}
+.top{background:transparent!important}
+.card,.loginCard,.win-edit-card{background:linear-gradient(145deg,#172326,#10191d)!important;border:1px solid #6c5732!important;color:#eee1c7!important;box-shadow:0 9px 32px #0004!important}
+.stat b,.card h2,.card h3,.top h1,.top h2{color:#f9d77f!important}
+.muted,.loginCard p{color:#b9aa88!important}
+.btn{border:1px solid #9a7840!important;color:#f6e9c8!important}
+.primary,.loginCard button{background:linear-gradient(115deg,#ffe28d,#f5cb55,#c89835)!important;color:#1a160f!important;border:1px solid #f4cf6d!important}
+.soft{background:#24302f!important;color:#f5ce76!important;border-color:#745b35!important}
+.danger{background:#502729!important;color:#ffb3ac!important;border-color:#945650!important}
+.input,select,textarea,.loginCard input{background:#101b20!important;color:#f4e7c8!important;border:1px solid #756039!important}
+input,select,textarea{color-scheme:dark}
+input::placeholder,textarea::placeholder{color:#a89a7b}
+input:focus,select:focus,textarea:focus{outline:1px solid #efc965!important}
+.table{border-color:#756039!important;background:#111b1f!important}
+table{color:#e9dcc1!important}
+th,td{border-bottom:1px solid #455044!important}
+th{color:#f5cc70!important;background:#1b2929!important}
+tr:hover td{background:#1b2728!important}
+#adminLogin{background:radial-gradient(circle at top,#263326,#0b1417 70%)!important}
+.loginCard h2{color:#ffd773!important}
+.loginCard button{cursor:pointer}
+#loginError{color:#ffa49d!important}
+.win-record-text{color:#e9dcc1!important}
+.win-record-text .amount{color:#ffd66f!important}
+#members td::before,#logs td::before,#activity td::before{color:#c7b079!important}
+@media(max-width:700px){
+body{background:#0b1116!important}
+.side{background:#111c20!important;border-right:0!important;border-bottom:1px solid #826634!important}
+.top{background:#111b20!important}
+}
+</style>
+</head><body>
 <div id="adminLogin">
   <div class="loginCard">
-    <div class="loginLogo">💕</div>
-    <h2>芯瑤 ATG 管理後台</h2>
+    <div class="loginLogo">👁️</div>
+    <h2>賽特神諭 ATG 管理後台</h2>
     <p>管理員登入</p>
     <input id="adminUser" autocomplete="username" placeholder="管理員帳號">
     <input id="adminPass" type="password" autocomplete="current-password" placeholder="管理員密碼">
@@ -343,7 +385,7 @@
     <div id="loginError"></div>
   </div>
 </div>
-<div class="app"><aside class="side"><div class="brand">💕 芯瑤 ATG 後台</div><nav class="nav">
+<div class="app"><aside class="side"><div class="brand">👁️ 賽特神諭 ATG 後台</div><nav class="nav">
 <button class="active" data-tab="overview">📊 總覽</button><button data-tab="members">👥 會員管理</button><button data-tab="detail">🪪 會員詳細</button><button data-tab="kick">🚪 強制登出</button><button data-tab="batch">➕ 批次新增</button><button data-tab="wins">🎉 恭喜會員</button><button data-tab="system">🟢 系統狀態</button><button data-tab="logs">🧾 操作紀錄</button><button data-tab="activity">👀 上線／操作</button><button data-tab="telemetry">👁️ 遊戲數據監測</button></nav></aside>
 <main class="main"><div class="top"><h2 id="title">總覽儀表板</h2><div class="row"><button class="btn soft" onclick="refreshAll()">↻ 更新</button><button id="logoutBtn" class="btn danger" onclick="adminLogout()">登出</button></div></div>
 <section id="overview" class="panel active"><div class="stats"><div class="card stat"><span class="muted">會員總數</span><b id="total">—</b></div><div class="card stat"><span class="muted">正常會員</span><b id="active">—</b></div><div class="card stat"><span class="muted">停用會員</span><b id="disabled">—</b></div><div class="card stat"><span class="muted">目前上線</span><b id="online">—</b></div><div class="card stat"><span class="muted">今日新增</span><b id="today_new">—</b></div></div><div class="card"><b>最近會員操作</b><div id="recent" class="muted">載入中...</div></div></section>
@@ -1111,7 +1153,7 @@ let hdOnlyBusy=false;
 
 let maintenanceStateCache={
   enabled:false,
-  message:"芯瑤 ATG 系統升級維護中，完成後將立即開放使用。",
+  message:"賽特神諭 ATG 系統升級維護中，完成後將立即開放使用。",
   updatedAt:null
 };
 
@@ -1128,7 +1170,7 @@ function maintenanceVisibleMessage(message){
     .replace(new RegExp("\\n{3,}","g"),"\n\n")
     .trim();
 
-  return cleaned||"芯瑤 ATG 系統升級維護中，完成後將立即開放使用。";
+  return cleaned||"賽特神諭 ATG 系統升級維護中，完成後將立即開放使用。";
 }
 
 function maintenanceMessageWithHdOnly(message,enabled){
@@ -1190,7 +1232,7 @@ function renderMaintenanceControl(state={},error=""){
               ${hdOnly?'🔒 目前：只允許皇鼎':'🌐 目前：任一娛樂城皆可使用'}
             </div>
             <div class="muted" style="margin-top:6px;line-height:1.6">
-              關閉後，可從其他娛樂城進入 ATG 使用芯瑤助手進行測試。<br>
+              關閉後，可從其他娛樂城進入 ATG 使用賽特神諭助手進行測試。<br>
               再次開啟後，就會恢復只允許皇鼎來源。
             </div>
           </div>
@@ -1286,8 +1328,8 @@ async function setHuangDingOnly(enabled){
   if(hdOnlyBusy)return;
 
   const actionText=enabled
-    ?"開啟後只允許從皇鼎娛樂城使用芯瑤 ATG。\n\n確定開啟？"
-    :"關閉後，其他娛樂城進入 ATG 也可以使用芯瑤助手。\n\n確定暫時關閉皇鼎限制？";
+    ?"開啟後只允許從皇鼎娛樂城使用賽特神諭 ATG。\n\n確定開啟？"
+    :"關閉後，其他娛樂城進入 ATG 也可以使用賽特神諭助手。\n\n確定暫時關閉皇鼎限制？";
 
   if(!confirm(actionText))return;
 
