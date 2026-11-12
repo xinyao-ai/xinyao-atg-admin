@@ -405,7 +405,7 @@
   <p class="tm-note">以台灣時間統計上傳快照和經確認事件的筆數；快照不是投注次數，更不能推算中獎機率。</p>
  </div>
  <div class="tm-panel"><h3>🏆 房號／爆分排行（按單筆派彩）</h3><div class="tm-scroll"><table><thead><tr><th>時間</th><th>會員</th><th>遊戲</th><th>房號</th><th>下注（點）</th><th>派彩（點）</th><th>淨收益（點）</th></tr></thead><tbody id="tmTop"></tbody></table></div></div>
- <div class="tm-panel"><h3>🎮 會員事件明細</h3><div class="tm-scroll"><table><thead><tr><th>時間</th><th>會員</th><th>遊戲</th><th>房號</th><th>事件</th><th>下注（點）</th><th>派彩（點）</th><th>免遊購買次數</th></tr></thead><tbody id="tmRows"></tbody></table></div></div>
+ <div class="tm-panel"><h3>👥 會員數據總覽</h3><p class="tm-note">一位會員一列，點「查看明細」才展開逐局紀錄；快照不列入下注與派彩合計。</p><div class="tm-scroll"><table><thead><tr><th>會員帳號</th><th>最新時間</th><th>最近遊戲／房號</th><th>紀錄／局數</th><th>下注合計</th><th>派彩合計</th><th>淨收益</th><th>操作</th></tr></thead><tbody id="tmRows"></tbody></table></div></div>
  <div class="tm-panel"><h3>📁 匯入真實紀錄（CSV）</h3>
   <p class="tm-note">目前可匯入你已授權取得的遊戲紀錄 CSV，在這台瀏覽器暫時分析，不會自動上傳或存入 GitHub。欄位格式：<code>time,member,game,room,bet,payout,type,free_buy_count</code>；type 可用 <code>spin</code> 或 <code>free_buy</code>。請勿包含密碼、Cookie 或 Token。</p>
   <input id="tmCsv" type="file" accept=".csv,text/csv" style="color:#eed5a2"><button type="button" class="btn soft" onclick="tmClearImport()">清除匯入資料</button>
@@ -413,6 +413,15 @@
  </div>
 </section></main></div>
 
+<style id="tm-member-group-style">
+.tm-member-row strong{color:#f6d079}
+.tm-expand-btn{border:1px solid #c99b43;border-radius:8px;background:#edc970;color:#211609;padding:6px 12px;white-space:nowrap;cursor:pointer;font-weight:700}
+.tm-member-expanded>td{padding:0!important}
+.tm-member-detail{background:#0e1b1a;padding:12px;border-block:1px solid #8e6e37}
+.tm-member-detail>strong{display:block;margin-bottom:10px;color:#f1d087}
+.tm-member-inner-scroll{max-height:390px;overflow:auto}
+.tm-member-inner-scroll table{width:100%;min-width:760px}
+</style>
 <script>
 const API="https://xinyao-atg-admin-api.love06130430.workers.dev";
 const LIVE_API="https://xinyao-atg-live.love06130430.workers.dev";
@@ -1611,23 +1620,41 @@ function tmRecords(){
  const since=hrs?Date.now()-hrs*3600000:0;
  return [...tmCloud,...tmImported].filter(x=>Date.parse(x.time)>=since&&x.member.toLowerCase().includes(member)&&(x.game+" "+x.room).toLowerCase().includes(game)).sort((a,b)=>Date.parse(b.time)-Date.parse(a.time));
 }
+
+const tmMemberExpanded=new Set();
+document.addEventListener("click", e=>{
+ const btn=e.target.closest("[data-tm-expand]");
+ if(!btn)return;
+ const id=btn.getAttribute("data-tm-expand");
+ if(tmMemberExpanded.has(id))tmMemberExpanded.delete(id);
+ else tmMemberExpanded.add(id);
+ tmRender();
+});
 function tmRender(){
- const a=tmRecords();
- const confirmed=a.filter(x=>["spin","free_buy"].includes(x.type));
- const sum=k=>confirmed.reduce((n,r)=>n+(r[k]??0),0);
- const buys=confirmed.reduce((n,r)=>n+(r.freeBuyCount??(r.type==="free_buy"?1:0)),0);
+ const a=tmRecords(), verified=a.filter(x=>["spin","free_buy"].includes(x.type));
+ const sum=k=>verified.reduce((n,x)=>n+(x[k]??0),0);
  const bet=sum("bet"),payout=sum("payout");
+ const buys=verified.reduce((n,x)=>n+(x.freeBuyCount??(x.type==="free_buy"?1:0)),0);
  for(const [id,v] of Object.entries({
-  tmCount:a.length,tmUsers:new Set(a.map(x=>x.member)).size,
-  tmBets:confirmed.length?bet:"—",tmPayout:confirmed.length?payout:"—",
-  tmNet:confirmed.length?payout-bet:"—",tmBuys:confirmed.length?buys:"—",
-  tmHigh:confirmed.filter(x=>(x.payout??0)>=50000).length
- })){
-  document.getElementById(id).textContent=typeof v==="number"?tmMoney(v):v;
+   tmCount:a.length,tmUsers:new Set(a.map(x=>x.member)).size,
+   tmBets:verified.length?bet:"—",tmPayout:verified.length?payout:"—",
+   tmNet:verified.length?payout-bet:"—",tmBuys:verified.length?buys:"—",
+   tmHigh:verified.filter(x=>(x.payout??0)>=50000).length
+ })) document.getElementById(id).textContent=typeof v==="number"?tmMoney(v):v;
+ const grouped=new Map();
+ for(const x of a){if(!grouped.has(x.member))grouped.set(x.member,[]);grouped.get(x.member).push(x)}
+ const detail=x=>"<tr><td>"+tmFmt(x.time)+"</td><td>"+E(x.game)+"</td><td>"+E(x.room)+"</td><td>"+E(x.type==="telemetry_snapshot"?"觀測快照":x.type==="spin_snapshot"?"舊版推估快照":x.type)+"</td><td>"+tmMoney(x.bet)+"</td><td>"+tmMoney(x.payout)+"</td><td>"+(["telemetry_snapshot","spin_snapshot"].includes(x.type)?"—":tmMoney(x.freeBuyCount??(x.type==="free_buy"?1:0)))+"</td></tr>";
+ const list=[];
+ for(const [member,events] of grouped){
+  const real=events.filter(x=>["spin","free_buy"].includes(x.type));
+  const b=real.reduce((n,x)=>n+(x.bet??0),0),p=real.reduce((n,x)=>n+(x.payout??0),0);
+  const latest=real[0]||events[0], expanded=tmMemberExpanded.has(member),safe=E(member);
+  list.push("<tr class='tm-member-row'><td><strong>"+safe+"</strong></td><td>"+tmFmt(events[0].time)+"</td><td>"+E(latest.game)+"／"+E(latest.room)+"</td><td>"+events.length+" 筆／"+real.length+" 局</td><td>"+(real.length?tmMoney(b):"—")+"</td><td>"+(real.length?tmMoney(p):"—")+"</td><td>"+(real.length?tmMoney(p-b):"—")+"</td><td><button type='button' class='tm-expand-btn' data-tm-expand='"+safe+"' aria-expanded='"+expanded+"'>"+(expanded?"收合 ▲":"查看明細 ▼")+"</button></td></tr>");
+  if(expanded)list.push("<tr class='tm-member-expanded'><td colspan='8'><div class='tm-member-detail'><strong>"+safe+"｜逐局紀錄（"+events.length+" 筆）</strong><div class='tm-member-inner-scroll'><table><thead><tr><th>時間</th><th>遊戲</th><th>房號</th><th>事件</th><th>下注（點）</th><th>派彩（點）</th><th>免遊購買次數</th></tr></thead><tbody>"+events.map(detail).join("")+"</tbody></table></div></div></td></tr>");
  }
- const html=(x,top)=>"<tr><td>"+tmFmt(x.time)+"</td><td>"+E(x.member)+"</td><td>"+E(x.game)+"</td><td>"+E(x.room)+"</td>"+(top?"":"<td>"+E(x.type==="telemetry_snapshot"?"觀測快照":x.type==="spin_snapshot"?"舊版推估快照":x.type)+"</td>")+"<td>"+tmMoney(x.bet)+"</td><td>"+tmMoney(x.payout)+"</td><td>"+(top?tmMoney(x.bet!==null&&x.payout!==null?x.payout-x.bet:null):(["telemetry_snapshot","spin_snapshot"].includes(x.type)?"—":tmMoney(x.freeBuyCount??(x.type==="free_buy"?1:0))))+"</td></tr>";
- document.getElementById("tmRows").innerHTML=a.slice(0,500).map(x=>html(x,false)).join("")||'<tr><td colspan="8">沒有符合條件的紀錄</td></tr>';
- document.getElementById("tmTop").innerHTML=confirmed.filter(x=>x.payout!==null).sort((x,y)=>y.payout-x.payout).slice(0,10).map(x=>html(x,true)).join("")||'<tr><td colspan="7">目前只有觀察快照，沒有可確認的逐筆派彩紀錄</td></tr>';
+ document.getElementById("tmRows").innerHTML=list.join("")||'<tr><td colspan="8">目前沒有會員紀錄</td></tr>';
+ const top=x=>"<tr><td>"+tmFmt(x.time)+"</td><td>"+E(x.member)+"</td><td>"+E(x.game)+"</td><td>"+E(x.room)+"</td><td>"+tmMoney(x.bet)+"</td><td>"+tmMoney(x.payout)+"</td><td>"+tmMoney(x.bet!==null&&x.payout!==null?x.payout-x.bet:null)+"</td></tr>";
+ document.getElementById("tmTop").innerHTML=verified.filter(x=>x.payout!==null).sort((x,y)=>y.payout-x.payout).slice(0,10).map(top).join("")||'<tr><td colspan="7">目前沒有可確認的逐筆派彩紀錄</td></tr>';
  const counts=Array(24).fill(0);
  a.forEach(x=>{let h=Number(new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Taipei",hour:"numeric",hourCycle:"h23"}).format(new Date(x.time)));if(h>=0&&h<24)counts[h]++});
  const max=Math.max(1,...counts);
