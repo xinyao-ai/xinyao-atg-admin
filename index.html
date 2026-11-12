@@ -373,6 +373,40 @@ body{background:#0b1116!important}
 .top{background:#111b20!important}
 }
 </style>
+
+<style id="seth-activity-accordion-style">
+/* 會員上線／操作紀錄：一會員一列，點擊展開原始紀錄 */
+#activity .activity-member-row>td{padding:0!important}
+#activity .activity-member-details{width:100%}
+#activity .activity-member-details>summary{display:flex;align-items:center;gap:16px;padding:14px 12px;cursor:pointer;list-style:none;min-height:48px}
+#activity .activity-member-details>summary::-webkit-details-marker{display:none}
+#activity .activity-member-details>summary:hover{background:#24302b}
+#activity .activity-member-account{font-weight:900;color:#ffe09a;flex:1;min-width:100px;overflow-wrap:anywhere}
+#activity .activity-member-count{color:#e0c278;min-width:85px}
+#activity .activity-member-last{color:#cbbfa5;min-width:180px}
+#activity .activity-member-open{color:#f4c75a;white-space:nowrap;font-weight:800}
+#activity .activity-member-details[open] .activity-member-open{color:#ffe49e}
+#activity .activity-member-details[open] .activity-member-open::after{content:" 已展開"}
+#activity .activity-member-scroll{overflow:auto;max-height:480px;border-top:1px solid #6c5732}
+#activity .activity-subtable{width:100%;min-width:580px;border-collapse:collapse}
+#activity .activity-subtable th,#activity .activity-subtable td{padding:10px 12px;text-align:left;border-bottom:1px solid #35443e}
+@media(max-width:700px){
+  #activity .activity-member-row{padding:0!important;display:block;background:#111b1f!important;border:1px solid #6c5732!important}
+  #activity .activity-member-row>td{display:block!important;border:0!important}
+  #activity .activity-member-row>td::before{content:none!important}
+  #activity .activity-member-details>summary{display:grid;grid-template-columns:1fr auto;gap:6px;padding:13px}
+  #activity .activity-member-account{grid-column:1;grid-row:1}
+  #activity .activity-member-count{grid-column:2;grid-row:1;text-align:right}
+  #activity .activity-member-last{grid-column:1;grid-row:2;min-width:0;font-size:12px}
+  #activity .activity-member-open{grid-column:2;grid-row:2;text-align:right}
+  #activity .activity-subtable{display:table!important;width:100%!important;min-width:580px!important}
+  #activity .activity-subtable thead{display:table-header-group!important}
+  #activity .activity-subtable tbody{display:table-row-group!important}
+  #activity .activity-subtable tr{display:table-row!important;padding:0!important;box-shadow:none!important;border:0!important}
+  #activity .activity-subtable td{display:table-cell!important;grid-template-columns:none!important;word-break:normal}
+  #activity .activity-subtable td::before{content:none!important}
+}
+</style>
 </head><body>
 <div id="adminLogin">
   <div class="loginCard">
@@ -678,14 +712,25 @@ async function loadActivity(){
     const d=await A("/activity");
     const rows=$("activityRows");
     if(rows){
-      rows.innerHTML=d.activity.map(a=>`
-        <tr>
-          <td>${F(a.created_at)}</td>
-          <td>${E(a.account)}</td>
-          <td>${E(a.action)}</td>
-          <td>${E(a.detail||"")}</td>
-          <td>${E(a.device||"")}</td>
-        </tr>`).join("")||'<tr><td colspan="5">尚無紀錄</td></tr>';
+      // 依會員帳號彙整，保留原始紀錄順序及全部欄位。
+      const byAccount=new Map();
+      for(const a of (d.activity||[])){
+        const key=String(a.account??"").trim()||"未知會員";
+        if(!byAccount.has(key))byAccount.set(key,[]);
+        byAccount.get(key).push(a);
+      }
+      rows.innerHTML=Array.from(byAccount,([account,items])=>{
+        const latest=items[0];
+        return `<tr class="activity-member-row"><td colspan="5">
+          <details class="activity-member-details">
+            <summary><span class="activity-member-account">${E(account)}</span><span class="activity-member-count">${items.length} 筆紀錄</span><span class="activity-member-last">最近：${F(latest.created_at)}</span><span class="activity-member-open">查看詳細 ▾</span></summary>
+            <div class="activity-member-scroll"><table class="activity-subtable">
+              <thead><tr><th>時間</th><th>操作</th><th>內容</th><th>裝置</th></tr></thead>
+              <tbody>${items.map(a=>`<tr><td>${F(a.created_at)}</td><td>${E(a.action)}</td><td>${E(a.detail||"")}</td><td>${E(a.device||"")}</td></tr>`).join("")}</tbody>
+            </table></div>
+          </details>
+        </td></tr>`;
+      }).join("")||'<tr><td colspan="5">尚無紀錄</td></tr>';
     }
 
     const recent=$("recent");
