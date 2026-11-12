@@ -380,7 +380,7 @@
 <section id="telemetry" class="panel">
  <div class="tm-panel">
   <h3>👁️ 遊戲數據監測｜會員實測紀錄</h3>
-  <p class="tm-note">僅統計有來源的遊戲事件。APP 尚未上傳或雲端 API 尚未啟用時，不會產生虛構數據。資料顯示需會員知情同意，且不得將樣本推算為 ATG 全體玩家。</p>
+  <p class="tm-note">僅顯示有來源的遊戲觀測。即時快照可呈現帳號、房號與當下讀值，但不會納入下注、派彩加總及爆分排行；只有經確認的逐筆投注事件才能計算。資料顯示需會員知情同意，且不得將樣本推算為 ATG 全體玩家。</p>
   <div class="tm-filter">
     <select id="tmPeriod" aria-label="分析時間"><option value="24">最近 24 小時</option><option value="168">最近 7 天</option><option value="720">最近 30 天</option><option value="0">全部紀錄</option></select>
     <input id="tmMember" placeholder="搜尋會員帳號" aria-label="會員帳號">
@@ -391,7 +391,7 @@
   <p id="tmStatus" class="tm-note">請登入管理員後載入資料。</p>
  </div>
  <div class="tm-cards">
-  <div class="tm-card"><small>有效紀錄</small><strong id="tmCount">—</strong></div>
+  <div class="tm-card"><small>觀測／事件筆數</small><strong id="tmCount">—</strong></div>
   <div class="tm-card"><small>有紀錄會員</small><strong id="tmUsers">—</strong></div>
   <div class="tm-card"><small>投注金額合計（點）</small><strong id="tmBets">—</strong></div>
   <div class="tm-card"><small>派彩金額合計（點）</small><strong id="tmPayout">—</strong></div>
@@ -400,9 +400,9 @@
   <div class="tm-card"><small>高額派彩事件（≥50,000）</small><strong id="tmHigh">—</strong></div>
  </div>
  <div class="tm-panel">
-  <h3>📈 24 小時派彩事件分布</h3>
+  <h3>📈 24 小時觀測紀錄分布</h3>
   <div style="overflow-x:auto"><div id="tmBars" class="tm-bars"></div><div id="tmBarLabels" class="tm-chart-labels"></div></div>
-  <p class="tm-note">以台灣時間統計事件發生的小時；顯示樣本事件次數，不代表下一局中獎機率。</p>
+  <p class="tm-note">以台灣時間統計上傳快照和經確認事件的筆數；快照不是投注次數，更不能推算中獎機率。</p>
  </div>
  <div class="tm-panel"><h3>🏆 房號／爆分排行（按單筆派彩）</h3><div class="tm-scroll"><table><thead><tr><th>時間</th><th>會員</th><th>遊戲</th><th>房號</th><th>下注（點）</th><th>派彩（點）</th><th>淨收益（點）</th></tr></thead><tbody id="tmTop"></tbody></table></div></div>
  <div class="tm-panel"><h3>🎮 會員事件明細</h3><div class="tm-scroll"><table><thead><tr><th>時間</th><th>會員</th><th>遊戲</th><th>房號</th><th>事件</th><th>下注（點）</th><th>派彩（點）</th><th>免遊購買次數</th></tr></thead><tbody id="tmRows"></tbody></table></div></div>
@@ -1612,19 +1612,26 @@ function tmRecords(){
  return [...tmCloud,...tmImported].filter(x=>Date.parse(x.time)>=since&&x.member.toLowerCase().includes(member)&&(x.game+" "+x.room).toLowerCase().includes(game)).sort((a,b)=>Date.parse(b.time)-Date.parse(a.time));
 }
 function tmRender(){
- const a=tmRecords(),sum=k=>a.reduce((n,r)=>n+(r[k]??0),0);
- const buys=a.reduce((n,r)=>n+(r.freeBuyCount??(r.type==="free_buy"?1:0)),0);
+ const a=tmRecords();
+ const confirmed=a.filter(x=>["spin","free_buy"].includes(x.type));
+ const sum=k=>confirmed.reduce((n,r)=>n+(r[k]??0),0);
+ const buys=confirmed.reduce((n,r)=>n+(r.freeBuyCount??(r.type==="free_buy"?1:0)),0);
  const bet=sum("bet"),payout=sum("payout");
- for(const [id,v] of Object.entries({tmCount:a.length,tmUsers:new Set(a.map(x=>x.member)).size,tmBets:bet,tmPayout:payout,tmNet:payout-bet,tmBuys:buys,tmHigh:a.filter(x=>(x.payout??0)>=50000).length})){
-  document.getElementById(id).textContent=tmMoney(v);
+ for(const [id,v] of Object.entries({
+  tmCount:a.length,tmUsers:new Set(a.map(x=>x.member)).size,
+  tmBets:confirmed.length?bet:"—",tmPayout:confirmed.length?payout:"—",
+  tmNet:confirmed.length?payout-bet:"—",tmBuys:confirmed.length?buys:"—",
+  tmHigh:confirmed.filter(x=>(x.payout??0)>=50000).length
+ })){
+  document.getElementById(id).textContent=typeof v==="number"?tmMoney(v):v;
  }
- const html=(x,top)=>"<tr><td>"+tmFmt(x.time)+"</td><td>"+E(x.member)+"</td><td>"+E(x.game)+"</td><td>"+E(x.room)+"</td>"+(top?"":"<td>"+E(x.type)+"</td>")+"<td>"+tmMoney(x.bet)+"</td><td>"+tmMoney(x.payout)+"</td><td>"+(top?tmMoney(x.bet!==null&&x.payout!==null?x.payout-x.bet:null):tmMoney(x.freeBuyCount??(x.type==="free_buy"?1:0)))+"</td></tr>";
- document.getElementById("tmRows").innerHTML=a.slice(0,500).map(x=>html(x,false)).join("")||'<tr><td colspan="8">沒有符合條件的真實紀錄</td></tr>';
- document.getElementById("tmTop").innerHTML=a.filter(x=>x.payout!==null).sort((x,y)=>y.payout-x.payout).slice(0,10).map(x=>html(x,true)).join("")||'<tr><td colspan="7">沒有可供排名的派彩紀錄</td></tr>';
+ const html=(x,top)=>"<tr><td>"+tmFmt(x.time)+"</td><td>"+E(x.member)+"</td><td>"+E(x.game)+"</td><td>"+E(x.room)+"</td>"+(top?"":"<td>"+E(x.type==="telemetry_snapshot"?"觀測快照":x.type==="spin_snapshot"?"舊版推估快照":x.type)+"</td>")+"<td>"+tmMoney(x.bet)+"</td><td>"+tmMoney(x.payout)+"</td><td>"+(top?tmMoney(x.bet!==null&&x.payout!==null?x.payout-x.bet:null):(["telemetry_snapshot","spin_snapshot"].includes(x.type)?"—":tmMoney(x.freeBuyCount??(x.type==="free_buy"?1:0))))+"</td></tr>";
+ document.getElementById("tmRows").innerHTML=a.slice(0,500).map(x=>html(x,false)).join("")||'<tr><td colspan="8">沒有符合條件的紀錄</td></tr>';
+ document.getElementById("tmTop").innerHTML=confirmed.filter(x=>x.payout!==null).sort((x,y)=>y.payout-x.payout).slice(0,10).map(x=>html(x,true)).join("")||'<tr><td colspan="7">目前只有觀察快照，沒有可確認的逐筆派彩紀錄</td></tr>';
  const counts=Array(24).fill(0);
  a.forEach(x=>{let h=Number(new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Taipei",hour:"numeric",hourCycle:"h23"}).format(new Date(x.time)));if(h>=0&&h<24)counts[h]++});
  const max=Math.max(1,...counts);
- document.getElementById("tmBars").innerHTML=counts.map((n,i)=>'<div class="tm-bar" title="'+i+':00：'+n+' 次" style="height:'+Math.max(2,n/max*145)+'px"></div>').join("");
+ document.getElementById("tmBars").innerHTML=counts.map((n,i)=>'<div class="tm-bar" title="'+i+':00：'+n+' 筆觀測" style="height:'+Math.max(2,n/max*145)+'px"></div>').join("");
  document.getElementById("tmBarLabels").innerHTML=counts.map((n,i)=>"<span>"+String(i).padStart(2,"0")+"</span>").join("");
 }
 async function tmFetch(){
