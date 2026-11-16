@@ -417,6 +417,18 @@ body{background:#0b1116!important}
 #dealers .dealer-item a{word-break:break-word}
 #dealers .dealer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 #dealers .dealer-actions button,#dealers .dealer-actions a{background:#e9c36f;color:#141414;border:0;border-radius:10px;font-weight:800;padding:10px 14px;text-decoration:none;cursor:pointer}
+</style><style id="seth-dealer-form-style">
+#dealers .dealer-editor{padding:15px;background:#141a18;border:1px solid #514634;border-radius:12px;margin:14px 0}
+#dealers .dealer-fields{display:grid;grid-template-columns:repeat(2,minmax(210px,1fr));gap:12px}
+#dealers .dealer-fields label{display:flex;flex-direction:column;gap:7px;font-size:13px;color:#f3d58b}
+#dealers .dealer-fields input{width:100%;padding:11px 12px;background:#0d1515;border:1px solid #8f7646;color:#fff1d6;border-radius:9px}
+#dealers .dealer-fields input[readonly]{opacity:.65}
+#dealers .dealer-switch{display:flex;gap:8px;align-items:center;margin:15px 0}
+#dealers .dealer-list{margin-top:25px}#dealers .dealer-list h3{display:flex;gap:10px;align-items:center}
+#dealers .dealer-list .table{border-color:#76613e}#dealers .dealer-list th,#dealers .dealer-list td{color:#eee0c4;border-color:#494339}
+#dealers .dealer-list table{min-width:680px}#dealers .dealer-list a{color:#f1ce7b}
+#dealers .dealer-list .soft{background:#564421;color:#fae2a7}
+@media(max-width:680px){#dealers .dealer-fields{grid-template-columns:1fr}}
 </style></head><body>
 <div id="adminLogin">
   <div class="loginCard">
@@ -1718,7 +1730,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  async function publish(){if(busy)return;if(slides.some(s=>!s.desktop&&!s._desktop)){msg('每張輪播圖至少要上傳一張電腦版圖片');return}if(slides.some(s=>s.link&&!/^https:\/\/[^\s]+$/i.test(s.link.trim()))){msg('點擊網址必須以 https:// 開頭');return}if(!confirm('確定將 '+slides.length+' 張輪播圖發布到正式版？'))return;
  busy=true;$('ocPublish').disabled=true;
  try{for(let i=0;i<slides.length;i++){const s=slides[i];for(const kind of ['desktop','mobile']){const file=s['_'+kind];if(!file)continue;msg('正在上傳第 '+(i+1)+' 張'+(kind==='desktop'?'電腦':'手機')+'圖片…');const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';s[kind]=await upload(file,Date.now()+'-'+i+'-'+kind+'.'+ext);delete s['_'+kind]}}
- const latest=await github('carousel-config.json?ref=main');const current=JSON.parse(decodeURIComponent(escape(atob(latest.content.replace(/\\s/g,'')))));const data={...current,version:1,intervalMs:6500,slides:slides.map(x=>({id:x.id,title:x.title,link:x.link,desktop:x.desktop,mobile:x.mobile,enabled:x.enabled}))};await github('carousel-config.json','PUT',{message:'Publish Oracle carousel',branch:'main',sha:latest.sha,content:b64(JSON.stringify(data,null,2)+'\n')});redraw();msg('✅ 已發布！網站部署後會顯示。')}catch(e){msg('❌ '+e.message)}finally{busy=false;$('ocPublish').disabled=false}}
+ const latest=await github('carousel-config.json?ref=main');const current=JSON.parse(decodeURIComponent(escape(atob(latest.content.replace(/\s/g,'')))));const data={...current,version:1,intervalMs:6500,slides:slides.map(x=>({id:x.id,title:x.title,link:x.link,desktop:x.desktop,mobile:x.mobile,enabled:x.enabled}))};await github('carousel-config.json','PUT',{message:'Publish Oracle carousel',branch:'main',sha:latest.sha,content:b64(JSON.stringify(data,null,2)+'\n')});redraw();msg('✅ 已發布！網站部署後會顯示。')}catch(e){msg('❌ '+e.message)}finally{busy=false;$('ocPublish').disabled=false}}
  function init(){const nav=document.querySelector('nav.nav'),main=document.querySelector('main.main');if(!nav||!main)return;const tab=document.createElement('button');tab.type='button';tab.dataset.tab='oracleSimpleCarousel';tab.textContent='🖼️ 輪播圖管理';nav.appendChild(tab);
  const section=document.createElement('section');section.className='panel';section.id='oracleSimpleCarousel';section.innerHTML=`<div class="oc-wrap"><h3>🖼️ 輪播圖管理</h3><div class="oc-hint">直接選圖片、預覽、填寫點擊網址，最後按發布。原本後台其他功能都不會更動。</div><div class="oc-sizes"><span>🖥️ 電腦：<b>1920 × 660 px</b></span><span>📱 手機：<b>1200 × 490 px</b></span></div><div class="oc-toolbar"><button type="button" id="ocAdd">＋ 新增輪播圖</button><button type="button" id="ocRefresh">重新讀取</button><button type="button" class="oc-publish" id="ocPublish">發布輪播圖</button></div><div id="ocStatus" role="status">尚未載入</div><div id="ocRows"></div></div>`;
  main.appendChild(section);$('ocAdd').onclick=()=>{slides.push({id:'slide-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),title:'',link:'',desktop:'',mobile:'',enabled:true});redraw()};$('ocRefresh').onclick=load;$('ocPublish').onclick=publish;tab.addEventListener('click',()=>{if($('title'))$('title').textContent='輪播圖管理';load()})}
@@ -1839,4 +1851,4 @@ document.addEventListener('DOMContentLoaded', () => {
     catch(e){status.textContent='瀏覽器未允許複製，請用上方連結開啟後複製網址。';}
   });
 });
-</script></body></html>
+</script><script src="./dealer-admin.js?v=1"></script></body></html>
