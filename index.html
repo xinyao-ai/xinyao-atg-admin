@@ -489,14 +489,18 @@ body{background:#0b1116!important}
  </div>
 </section>
 <section id="reviewsModeration" class="panel">
- <div class="card" style="padding:14px 15px;margin-top:8px">
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:11px">
-   <div><b style="color:#f5d181;font-size:17px">⭐ 玩家評價｜投稿審核</b><div class="muted" style="margin-top:5px">查看待審核、已公開與未通過的玩家投稿；只有核准後才會顯示在落地頁。</div></div>
-   <a href="https://seth-oracle.github.io/reviews/manage/" target="_blank" rel="noopener noreferrer" class="btn soft" style="text-decoration:none">另開審核畫面 ↗</a>
+<div class="card" style="margin-top:8px">
+  <div style="display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap">
+    <div><b style="font-size:18px;color:#f6d079">⭐ 玩家評價｜投稿審核</b>
+    <div class="muted" style="margin-top:4px">與 ATG 後台共用登入；玩家投稿經妳審核核准後，才會顯示在官網。</div></div>
+    <div class="row">
+      <select id="reviewManagerFilter" aria-label="評價審核狀態"><option value="all">全部投稿</option><option value="pending">待審核</option><option value="approved">已公開</option><option value="rejected">未通過</option></select>
+      <button class="btn primary" type="button" id="reviewManagerRefresh">↻ 重新整理</button>
+    </div>
   </div>
-  <iframe id="reviewModerationFrame" title="玩家評價審核後台" data-src="https://seth-oracle.github.io/reviews/manage/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" style="display:block;width:100%;height:min(78vh,880px);min-height:540px;background:#090807;border:1px solid #70532e;border-radius:12px"></iframe>
-  <p class="muted" style="margin-top:10px">安全提醒：評價審核採獨立權限，首次使用需輸入妳先前設定的 ADMIN_TOKEN。密鑰只輸入在嵌入的評價後台中，不需要在 ATG 會員登入欄位輸入。</p>
- </div>
+  <p id="reviewManagerStatus" style="margin:12px 0;color:#edc979" role="status">開啟此分頁後讀取投稿…</p>
+  <div id="reviewManagerList"></div>
+</div>
 </section></main></div>
 
 <style id="tm-member-group-style">
@@ -571,10 +575,7 @@ document.addEventListener("click",e=>{
   if(b.dataset.tab==="logs")loadLogs();
   if(b.dataset.tab==="activity")loadActivity();
   if(b.dataset.tab==="telemetry")tmFetch();
-  if(b.dataset.tab==="reviewsModeration"){
-    const frame=$("reviewModerationFrame");
-    if(frame && !frame.src)frame.src=frame.dataset.src;
-  }
+  if(b.dataset.tab==="reviewsModeration")window.loadATGReviewSubmissions?.();
   if(b.dataset.tab==="system")health();
 });
 
@@ -1801,4 +1802,5 @@ document.addEventListener("DOMContentLoaded",()=>{
  });
  tmRender();
 });
-</script></body></html>
+</script>
+<script src="./review-moderation.js"></script></body></html>
