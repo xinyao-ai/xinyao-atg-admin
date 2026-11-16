@@ -407,7 +407,17 @@ body{background:#0b1116!important}
   #activity .activity-subtable td::before{content:none!important}
 }
 </style>
-</head><body>
+<style id="seth-dealer-admin-css">
+#dealers .dealer-frame{background:linear-gradient(145deg,#111714,#25201a);color:#f1e6cb;border:1px solid #b99450;border-radius:16px;padding:20px}
+#dealers .dealer-frame h3{margin:0 0 12px;color:#f6d78a}#dealers .dealer-frame a{color:#f6d78a;overflow-wrap:anywhere}
+#dealers .dealer-frame .dealer-note{font-size:13px;color:#d5c8af;line-height:1.7}
+#dealers .dealer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:15px 0}
+#dealers .dealer-item{background:#191e1b;border:1px solid #4b4130;border-radius:12px;padding:12px;min-width:0}
+#dealers .dealer-item strong{display:block;color:#bfa46b;margin-bottom:8px}
+#dealers .dealer-item a{word-break:break-word}
+#dealers .dealer-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+#dealers .dealer-actions button,#dealers .dealer-actions a{background:#e9c36f;color:#141414;border:0;border-radius:10px;font-weight:800;padding:10px 14px;text-decoration:none;cursor:pointer}
+</style></head><body>
 <div id="adminLogin">
   <div class="loginCard">
     <div class="loginLogo">👁️</div>
@@ -420,9 +430,23 @@ body{background:#0b1116!important}
   </div>
 </div>
 <div class="app"><aside class="side"><div class="brand">賽特神諭 ATG 後台</div><nav class="nav">
-<button class="active" data-tab="overview">📊 總覽</button><button data-tab="members">👥 會員管理</button><button data-tab="detail">🪪 會員詳細</button><button data-tab="kick">🚪 強制登出</button><button data-tab="batch">➕ 批次新增</button><button data-tab="wins">🎉 恭喜會員</button><button data-tab="system">🟢 系統狀態</button><button data-tab="logs">🧾 操作紀錄</button><button data-tab="activity">👀 上線／操作</button><button data-tab="telemetry">👁️ 遊戲數據監測</button><button data-tab="reviewsModeration">⭐ 玩家評價審核</button></nav></aside>
+<button class="active" data-tab="overview">📊 總覽</button><button data-tab="members">👥 會員管理</button><button data-tab="detail">🪪 會員詳細</button><button data-tab="kick">🚪 強制登出</button><button data-tab="batch">➕ 批次新增</button><button data-tab="wins">🎉 恭喜會員</button><button data-tab="system">🟢 系統狀態</button><button data-tab="logs">🧾 操作紀錄</button><button data-tab="activity">👀 上線／操作</button><button data-tab="telemetry">👁️ 遊戲數據監測</button><button data-tab="reviewsModeration">⭐ 玩家評價審核</button><button data-tab="dealers">👑 經銷商管理</button></nav></aside>
 <main class="main"><div class="top"><h2 id="title">總覽儀表板</h2><div class="row"><button class="btn soft" onclick="refreshAll()">↻ 更新</button><button id="logoutBtn" class="btn danger" onclick="adminLogout()">登出</button></div></div>
-<section id="overview" class="panel active"><div class="stats"><div class="card stat"><span class="muted">會員總數</span><b id="total">—</b></div><div class="card stat"><span class="muted">正常會員</span><b id="active">—</b></div><div class="card stat"><span class="muted">停用會員</span><b id="disabled">—</b></div><div class="card stat"><span class="muted">目前上線</span><b id="online">—</b></div><div class="card stat"><span class="muted">今日新增</span><b id="today_new">—</b></div></div><div class="card"><b>最近會員操作</b><div id="recent" class="muted">載入中...</div></div></section>
+<section id="dealers" class="panel">
+<div class="dealer-frame">
+<h3>👑 經銷商管理</h3>
+<div class="dealer-note">目前已建立 A001 專屬測試頁。此處先提供現有設定檢視與連結複製；新增、修改、停用及會員資料分流尚未串接安全管理 API，暫時不開放操作，以免誤改正式版。</div>
+<div class="dealer-grid">
+<div class="dealer-item"><strong>經銷商編號</strong>A001（測試）</div>
+<div class="dealer-item"><strong>皇鼎註冊連結</strong><a href="https://hd5957.com/?aff=sx59vt" target="_blank" rel="noopener noreferrer">https://hd5957.com/?aff=sx59vt</a></div>
+<div class="dealer-item"><strong>LINE 官方帳號</strong><a href="https://lin.ee/piiNk2M" target="_blank" rel="noopener noreferrer">https://lin.ee/piiNk2M</a></div>
+</div>
+<div class="dealer-actions">
+<a href="https://xinyao-ai.github.io/xinyao-ai/dealer-preview.html?dealer=A001" target="_blank" rel="noopener noreferrer">開啟 A001 專屬測試頁</a>
+<button type="button" id="dealerCopyLink">複製專屬網址</button>
+</div>
+<p class="dealer-note" id="dealerCopyStatus" role="status">你的原版註冊、LINE 和會員資料設定不會被此頁修改。</p>
+</div></section><section id="overview" class="panel active"><div class="stats"><div class="card stat"><span class="muted">會員總數</span><b id="total">—</b></div><div class="card stat"><span class="muted">正常會員</span><b id="active">—</b></div><div class="card stat"><span class="muted">停用會員</span><b id="disabled">—</b></div><div class="card stat"><span class="muted">目前上線</span><b id="online">—</b></div><div class="card stat"><span class="muted">今日新增</span><b id="today_new">—</b></div></div><div class="card"><b>最近會員操作</b><div id="recent" class="muted">載入中...</div></div></section>
 <section id="members" class="panel"><div class="card"><div class="row"><input id="search" class="input" placeholder="搜尋會員"><button class="btn soft" onclick="loadMembers()">搜尋</button><input id="newAccount" class="input" placeholder="新增會員帳號"><button class="btn primary" onclick="addMember()">新增會員</button></div><div id="memberMsg"></div><div class="table"><table><thead><tr><th>ID</th><th>帳號</th><th>狀態</th><th>最後登入</th><th>最後活動</th><th>到期日</th><th>操作</th></tr></thead><tbody id="memberRows"></tbody></table></div></div></section>
 <section id="detail" class="panel"><div class="card"><div class="row"><input id="detailId" class="input" placeholder="會員 ID"><button class="btn primary" onclick="loadDetail()">讀取</button></div><div id="detailBox" class="muted">請選會員。</div></div></section>
 <section id="kick" class="panel"><div class="card"><div class="row"><input id="kickId" class="input" placeholder="會員 ID"><button class="btn danger" onclick="kick()">強制登出</button></div><div id="kickMsg"></div><p class="muted">ATG 前台需同步檢查 force_logout，才能真正踢下線。</p></div></section>
@@ -554,6 +578,7 @@ const titles={
   logs:"操作紀錄",
   activity:"會員上線／操作紀錄",
   telemetry:"遊戲數據監測",
+  dealers:"經銷商管理",
   reviewsModeration:"玩家評價審核"
 };
 
@@ -1803,4 +1828,15 @@ document.addEventListener("DOMContentLoaded",()=>{
  tmRender();
 });
 </script>
-<script src="./review-moderation.js"></script></body></html>
+<script src="./review-moderation.js"></script><script id="seth-dealer-admin-actions">
+document.addEventListener('DOMContentLoaded', () => {
+  const btn=document.getElementById('dealerCopyLink');
+  if(!btn)return;
+  btn.addEventListener('click',async()=>{
+    const url='https://xinyao-ai.github.io/xinyao-ai/dealer-preview.html?dealer=A001';
+    const status=document.getElementById('dealerCopyStatus');
+    try{await navigator.clipboard.writeText(url);status.textContent='✅ 已複製 A001 專屬測試網址';}
+    catch(e){status.textContent='瀏覽器未允許複製，請用上方連結開啟後複製網址。';}
+  });
+});
+</script></body></html>
