@@ -420,7 +420,7 @@ body{background:#0b1116!important}
   </div>
 </div>
 <div class="app"><aside class="side"><div class="brand">賽特神諭 ATG 後台</div><nav class="nav">
-<button class="active" data-tab="overview">📊 總覽</button><button data-tab="members">👥 會員管理</button><button data-tab="detail">🪪 會員詳細</button><button data-tab="kick">🚪 強制登出</button><button data-tab="batch">➕ 批次新增</button><button data-tab="wins">🎉 恭喜會員</button><button data-tab="system">🟢 系統狀態</button><button data-tab="logs">🧾 操作紀錄</button><button data-tab="activity">👀 上線／操作</button><button data-tab="telemetry">👁️ 遊戲數據監測</button></nav></aside>
+<button class="active" data-tab="overview">📊 總覽</button><button data-tab="members">👥 會員管理</button><button data-tab="detail">🪪 會員詳細</button><button data-tab="kick">🚪 強制登出</button><button data-tab="batch">➕ 批次新增</button><button data-tab="wins">🎉 恭喜會員</button><button data-tab="system">🟢 系統狀態</button><button data-tab="logs">🧾 操作紀錄</button><button data-tab="activity">👀 上線／操作</button><button data-tab="telemetry">👁️ 遊戲數據監測</button><button data-tab="reviewsModeration">⭐ 玩家評價審核</button></nav></aside>
 <main class="main"><div class="top"><h2 id="title">總覽儀表板</h2><div class="row"><button class="btn soft" onclick="refreshAll()">↻ 更新</button><button id="logoutBtn" class="btn danger" onclick="adminLogout()">登出</button></div></div>
 <section id="overview" class="panel active"><div class="stats"><div class="card stat"><span class="muted">會員總數</span><b id="total">—</b></div><div class="card stat"><span class="muted">正常會員</span><b id="active">—</b></div><div class="card stat"><span class="muted">停用會員</span><b id="disabled">—</b></div><div class="card stat"><span class="muted">目前上線</span><b id="online">—</b></div><div class="card stat"><span class="muted">今日新增</span><b id="today_new">—</b></div></div><div class="card"><b>最近會員操作</b><div id="recent" class="muted">載入中...</div></div></section>
 <section id="members" class="panel"><div class="card"><div class="row"><input id="search" class="input" placeholder="搜尋會員"><button class="btn soft" onclick="loadMembers()">搜尋</button><input id="newAccount" class="input" placeholder="新增會員帳號"><button class="btn primary" onclick="addMember()">新增會員</button></div><div id="memberMsg"></div><div class="table"><table><thead><tr><th>ID</th><th>帳號</th><th>狀態</th><th>最後登入</th><th>最後活動</th><th>到期日</th><th>操作</th></tr></thead><tbody id="memberRows"></tbody></table></div></div></section>
@@ -487,6 +487,16 @@ body{background:#0b1116!important}
   <input id="tmCsv" type="file" accept=".csv,text/csv" style="color:#eed5a2"><button type="button" class="btn soft" onclick="tmClearImport()">清除匯入資料</button>
   <p id="tmCsvStatus" class="tm-note"></p>
  </div>
+</section>
+<section id="reviewsModeration" class="panel">
+ <div class="card" style="padding:14px 15px;margin-top:8px">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:11px">
+   <div><b style="color:#f5d181;font-size:17px">⭐ 玩家評價｜投稿審核</b><div class="muted" style="margin-top:5px">查看待審核、已公開與未通過的玩家投稿；只有核准後才會顯示在落地頁。</div></div>
+   <a href="https://seth-oracle.github.io/reviews/manage/" target="_blank" rel="noopener noreferrer" class="btn soft" style="text-decoration:none">另開審核畫面 ↗</a>
+  </div>
+  <iframe id="reviewModerationFrame" title="玩家評價審核後台" data-src="https://seth-oracle.github.io/reviews/manage/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" style="display:block;width:100%;height:min(78vh,880px);min-height:540px;background:#090807;border:1px solid #70532e;border-radius:12px"></iframe>
+  <p class="muted" style="margin-top:10px">安全提醒：評價審核採獨立權限，首次使用需輸入妳先前設定的 ADMIN_TOKEN。密鑰只輸入在嵌入的評價後台中，不需要在 ATG 會員登入欄位輸入。</p>
+ </div>
 </section></main></div>
 
 <style id="tm-member-group-style">
@@ -539,7 +549,8 @@ const titles={
   system:"系統狀態",
   logs:"操作紀錄",
   activity:"會員上線／操作紀錄",
-  telemetry:"遊戲數據監測"
+  telemetry:"遊戲數據監測",
+  reviewsModeration:"玩家評價審核"
 };
 
 document.addEventListener("click",e=>{
@@ -560,6 +571,10 @@ document.addEventListener("click",e=>{
   if(b.dataset.tab==="logs")loadLogs();
   if(b.dataset.tab==="activity")loadActivity();
   if(b.dataset.tab==="telemetry")tmFetch();
+  if(b.dataset.tab==="reviewsModeration"){
+    const frame=$("reviewModerationFrame");
+    if(frame && !frame.src)frame.src=frame.dataset.src;
+  }
   if(b.dataset.tab==="system")health();
 });
 
