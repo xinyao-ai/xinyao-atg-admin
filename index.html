@@ -331,6 +331,36 @@
 #telemetry .tm-bars{display:grid;grid-template-columns:repeat(24,minmax(18px,1fr));gap:4px;align-items:end;height:150px;min-width:530px}
 #telemetry .tm-bar{background:linear-gradient(#ffde85,#87652f);min-height:2px;border-radius:4px 4px 0 0}
 #telemetry .tm-chart-labels{display:grid;grid-template-columns:repeat(24,1fr);gap:4px;min-width:530px;font-size:10px;color:#b8a887;text-align:center}
+
+/* 自訂監測：預覽與編輯雙模式，獨立於真實監測 */
+#customTelemetry .tm-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin:12px 0}
+#customTelemetry .tm-card{background:#192526;border:1px solid #4b422e;border-radius:12px;padding:14px;min-width:0}
+#customTelemetry .tm-card small{color:#ccba94;display:block;font-size:12px;line-height:1.5}
+#customTelemetry .tm-card strong{font-size:24px;display:block;margin-top:7px;color:#ffe0a0;word-break:break-word}
+#customTelemetry h3{color:#f4c96e}
+#customTelemetry .tm-bars{display:grid;grid-template-columns:repeat(24,minmax(18px,1fr));gap:4px;align-items:end;height:150px;min-width:530px}
+#customTelemetry .tm-bar{background:linear-gradient(#ffde85,#87652f);min-height:2px;border-radius:4px 4px 0 0}
+#customTelemetry .tm-chart-labels{display:grid;grid-template-columns:repeat(24,1fr);gap:4px;min-width:530px;font-size:10px;color:#b8a887;text-align:center}
+#customTelemetry .cm-edit-only{display:none!important}
+#customTelemetry.cm-editing .cm-edit-only{display:initial!important}
+#customTelemetry.cm-editing #cmHours{display:grid!important}
+#customTelemetry.cm-editing .cm-label,#customTelemetry.cm-editing .cm-value{display:block!important}
+#customTelemetry.cm-editing .cm-preview-only{display:none!important}
+#customTelemetry .cm-view-row td{white-space:nowrap}
+#customTelemetry .cm-edit-row{display:none}
+#customTelemetry.cm-editing .cm-edit-row{display:table-row}
+#customTelemetry.cm-editing .cm-view-row{display:none}
+#customTelemetry .cm-hours{display:none}
+#customTelemetry .fg-input{display:none}
+#customTelemetry.cm-editing .fg-input{display:block}
+#customTelemetry.cm-editing .fg-preview{display:none}
+#customTelemetry .fg-preview{display:block;font-size:24px;color:#ffe0a0;font-weight:800;margin-top:8px}
+#customTelemetry #fgSave,#customTelemetry #fgClear{display:none}
+#customTelemetry.cm-editing #fgSave,#customTelemetry.cm-editing #fgClear{display:inline-block}
+#customTelemetry #cmSave,#customTelemetry #cmExport,#customTelemetry #cmReset,#customTelemetry #cmImportLabel{display:none}
+#customTelemetry.cm-editing #cmSave,#customTelemetry.cm-editing #cmExport,#customTelemetry.cm-editing #cmReset,#customTelemetry.cm-editing #cmImportLabel{display:inline-block}
+#customTelemetry .cm-add{display:none}
+#customTelemetry.cm-editing .cm-add{display:inline-block}
 </style>
 <style id="seth-oracle-admin-gold-theme">
 /* 賽特神諭後台：視覺覆蓋層，不更動會員資料、事件或 API */
@@ -503,12 +533,13 @@ body{background:#0b1116!important}
 
 <section id="customTelemetry" class="panel">
  <div class="tm-panel">
-  <h3>📝 自訂遊戲數據監測｜手動編輯</h3>
+  <h3>📝 自訂遊戲數據監測｜資料儀表板</h3>
   <p class="tm-note"><strong>自訂展示資料（非實測）</strong>：此頁數字與紀錄全部由管理員手動輸入，不連接真實監測 API，也不會覆蓋原本的「遊戲數據監測」。修改後請按「儲存」。</p>
   <div class="tm-filter">
+   <button type="button" id="cmToggle" aria-pressed="false">✏️ 編輯資料</button>
    <button type="button" id="cmSave">💾 儲存自訂數據</button>
    <button type="button" id="cmExport">⬇️ 匯出 JSON 備份</button>
-   <label style="color:#f5d07a">⬆️ 匯入 JSON <input id="cmImport" type="file" accept=".json,application/json" style="max-width:210px"></label>
+   <label id="cmImportLabel" style="color:#f5d07a">⬆️ 匯入 JSON <input id="cmImport" type="file" accept=".json,application/json" style="max-width:210px"></label>
    <button type="button" id="cmReset">清空自訂數據</button>
   </div>
   <p id="cmStatus" class="tm-note">目前資料只儲存在這台瀏覽器；若換電腦或清除瀏覽器資料，請使用 JSON 備份還原。</p>
@@ -517,8 +548,8 @@ body{background:#0b1116!important}
 <h3>🎰 免費遊戲回報金額比較｜自訂</h3>
 <p class="tm-note">這裡是自訂展示數據，並非真實遊戲紀錄。兩個回報金額可自行編輯，差額與倍數會即時計算。</p>
 <div class="tm-cards">
-<div class="tm-card"><small>購買免費遊戲｜回報總金額（點）</small><input id="fgCustomBuy" class="fg-input cm-value" data-fg="buy" type="number" min="0" step="any" placeholder="輸入回報總金額"></div>
-<div class="tm-card"><small>平轉進免費遊戲｜回報總金額（點）</small><input id="fgCustomSpin" class="fg-input cm-value" data-fg="spin" type="number" min="0" step="any" placeholder="輸入回報總金額"></div>
+<div class="tm-card"><small>購買免費遊戲｜回報總金額（點）</small><input id="fgCustomBuy" class="fg-input cm-value" data-fg="buy" type="number" min="0" step="any" placeholder="輸入回報總金額"><strong class="fg-preview" id="fgPreviewBuy">—</strong></div>
+<div class="tm-card"><small>平轉進免費遊戲｜回報總金額（點）</small><input id="fgCustomSpin" class="fg-input cm-value" data-fg="spin" type="number" min="0" step="any" placeholder="輸入回報總金額"><strong class="fg-preview" id="fgPreviewSpin">—</strong></div>
 <div class="tm-card"><small>回報差額（購買－平轉）</small><strong id="fgCustomDiff">—</strong></div>
 <div class="tm-card"><small>回報倍數（購買 ÷ 平轉）</small><strong id="fgCustomRatio">—</strong></div>
 </div>
@@ -1907,4 +1938,4 @@ document.addEventListener('DOMContentLoaded', () => {
     catch(e){status.textContent='瀏覽器未允許複製，請用上方連結開啟後複製網址。';}
   });
 });
-</script><script src="./dealer-admin.js?v=1"></script><script src="./custom-telemetry.js?v=1"></script><script src="./freegame-returns.js?v=1"></script></body></html>
+</script><script src="./dealer-admin.js?v=1"></script><script src="./custom-telemetry.js?v=2"></script><script src="./freegame-returns.js?v=2"></script></body></html>
