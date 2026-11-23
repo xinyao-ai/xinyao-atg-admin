@@ -429,6 +429,17 @@ body{background:#0b1116!important}
 #dealers .dealer-list table{min-width:680px}#dealers .dealer-list a{color:#f1ce7b}
 #dealers .dealer-list .soft{background:#564421;color:#fae2a7}
 @media(max-width:680px){#dealers .dealer-fields{grid-template-columns:1fr}}
+</style><style id="cm-custom-styles">
+#customTelemetry .cm-label,#customTelemetry .cm-value,#customTelemetry .cm-cell,#customTelemetry .cm-hour input{color:#ffe0a0;background:#121d1e;border:1px solid #8f713b;border-radius:7px;padding:8px;max-width:100%;font-family:inherit}
+#customTelemetry .cm-label{width:100%;font-size:12px}
+#customTelemetry .cm-value{width:100%;font-weight:800;font-size:22px;margin-top:7px}
+#customTelemetry .cm-cell{width:145px;min-width:90px;font-size:12px}
+#customTelemetry .cm-hours{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:15px}
+#customTelemetry .cm-hour{display:grid;gap:4px;color:#f4d38e;font-size:12px}
+#customTelemetry .cm-hour input{width:100%}
+#customTelemetry .cm-add,#customTelemetry .cm-delete{border:1px solid #b99548;background:#e9bf65;color:#191a14;padding:9px 12px;border-radius:8px;font-weight:700;cursor:pointer;margin-top:10px}
+#customTelemetry .cm-delete{background:#46332b;color:#ffe1ad;margin:0}
+#customTelemetry .tm-scroll{overflow-x:auto}
 </style></head><body>
 <div id="adminLogin">
   <div class="loginCard">
@@ -442,7 +453,7 @@ body{background:#0b1116!important}
   </div>
 </div>
 <div class="app"><aside class="side"><div class="brand">賽特神諭 ATG 後台</div><nav class="nav">
-<button class="active" data-tab="overview">📊 總覽</button><button data-tab="members">👥 會員管理</button><button data-tab="detail">🪪 會員詳細</button><button data-tab="kick">🚪 強制登出</button><button data-tab="batch">➕ 批次新增</button><button data-tab="wins">🎉 恭喜會員</button><button data-tab="system">🟢 系統狀態</button><button data-tab="logs">🧾 操作紀錄</button><button data-tab="activity">👀 上線／操作</button><button data-tab="telemetry">👁️ 遊戲數據監測</button><button data-tab="reviewsModeration">⭐ 玩家評價審核</button><button data-tab="dealers">👑 經銷商管理</button></nav></aside>
+<button class="active" data-tab="overview">📊 總覽</button><button data-tab="members">👥 會員管理</button><button data-tab="detail">🪪 會員詳細</button><button data-tab="kick">🚪 強制登出</button><button data-tab="batch">➕ 批次新增</button><button data-tab="wins">🎉 恭喜會員</button><button data-tab="system">🟢 系統狀態</button><button data-tab="logs">🧾 操作紀錄</button><button data-tab="activity">👀 上線／操作</button><button data-tab="telemetry">👁️ 遊戲數據監測</button><button data-tab="customTelemetry">📝 自訂遊戲數據監測</button><button data-tab="reviewsModeration">⭐ 玩家評價審核</button><button data-tab="dealers">👑 經銷商管理</button></nav></aside>
 <main class="main"><div class="top"><h2 id="title">總覽儀表板</h2><div class="row"><button class="btn soft" onclick="refreshAll()">↻ 更新</button><button id="logoutBtn" class="btn danger" onclick="adminLogout()">登出</button></div></div>
 <section id="dealers" class="panel">
 <div class="dealer-frame">
@@ -489,6 +500,29 @@ body{background:#0b1116!important}
 <section id="logs" class="panel"><div class="card"><div class="table"><table><thead><tr><th>時間</th><th>管理員</th><th>操作</th><th>對象</th><th>內容</th></tr></thead><tbody id="logRows"></tbody></table></div></div></section>
 <section id="activity" class="panel"><div class="card"><div class="table"><table><thead><tr><th>時間</th><th>會員</th><th>操作</th><th>內容</th><th>裝置</th></tr></thead><tbody id="activityRows"></tbody></table></div></div></section>
 
+
+<section id="customTelemetry" class="panel">
+ <div class="tm-panel">
+  <h3>📝 自訂遊戲數據監測｜手動編輯</h3>
+  <p class="tm-note"><strong>自訂展示資料（非實測）</strong>：此頁數字與紀錄全部由管理員手動輸入，不連接真實監測 API，也不會覆蓋原本的「遊戲數據監測」。修改後請按「儲存」。</p>
+  <div class="tm-filter">
+   <button type="button" id="cmSave">💾 儲存自訂數據</button>
+   <button type="button" id="cmExport">⬇️ 匯出 JSON 備份</button>
+   <label style="color:#f5d07a">⬆️ 匯入 JSON <input id="cmImport" type="file" accept=".json,application/json" style="max-width:210px"></label>
+   <button type="button" id="cmReset">清空自訂數據</button>
+  </div>
+  <p id="cmStatus" class="tm-note">目前資料只儲存在這台瀏覽器；若換電腦或清除瀏覽器資料，請使用 JSON 備份還原。</p>
+ </div>
+ <div id="cmCards" class="tm-cards"></div>
+ <div class="tm-panel">
+  <h3>📈 24 小時觀測紀錄分布｜自訂</h3>
+  <div style="overflow-x:auto"><div id="cmBars" class="tm-bars"></div><div id="cmBarLabels" class="tm-chart-labels"></div></div>
+  <p class="tm-note">以下每小時數量都能自行更改，圖表會即時更新。</p>
+  <div id="cmHours" class="cm-hours"></div>
+ </div>
+ <div class="tm-panel"><h3>🏆 房號／爆分排行｜自訂</h3><div class="tm-scroll"><table><thead><tr><th>時間</th><th>會員</th><th>遊戲</th><th>房號</th><th>下注（點）</th><th>派彩（點）</th><th>淨收益（點）</th><th>操作</th></tr></thead><tbody id="cmTop"></tbody></table></div><button type="button" data-add="top" class="cm-add">＋ 新增排行紀錄</button></div>
+ <div class="tm-panel"><h3>👥 會員數據總覽｜自訂</h3><div class="tm-scroll"><table><thead><tr><th>會員帳號</th><th>最新時間</th><th>最近遊戲／房號</th><th>紀錄／局數</th><th>下注合計</th><th>派彩合計</th><th>淨收益</th><th>操作</th></tr></thead><tbody id="cmMembers"></tbody></table></div><button type="button" data-add="members" class="cm-add">＋ 新增會員紀錄</button></div>
+</section>
 <section id="telemetry" class="panel">
  <div class="tm-panel">
   <h3>👁️ 遊戲數據監測｜會員實測紀錄</h3>
@@ -590,6 +624,7 @@ const titles={
   logs:"操作紀錄",
   activity:"會員上線／操作紀錄",
   telemetry:"遊戲數據監測",
+  customTelemetry:"自訂遊戲數據監測",
   dealers:"經銷商管理",
   reviewsModeration:"玩家評價審核"
 };
@@ -1851,4 +1886,4 @@ document.addEventListener('DOMContentLoaded', () => {
     catch(e){status.textContent='瀏覽器未允許複製，請用上方連結開啟後複製網址。';}
   });
 });
-</script><script src="./dealer-admin.js?v=1"></script></body></html>
+</script><script src="./dealer-admin.js?v=1"></script><script src="./custom-telemetry.js?v=1"></script></body></html>
