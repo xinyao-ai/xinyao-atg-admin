@@ -30,6 +30,8 @@ function real(){
 }
 function updateManual(){
  const a=num(manual.buy),b=num(manual.spin);
+ $("fgPreviewBuy").textContent=a!==null?fmt(a):"—";
+ $("fgPreviewSpin").textContent=b!==null?fmt(b):"—";
  $("fgCustomDiff").textContent=a!==null&&b!==null?fmt(a-b):"—";
  $("fgCustomRatio").textContent=a!==null&&b!==null&&b>0?(a/b).toFixed(2)+" 倍":"—";
 }
@@ -41,7 +43,9 @@ function load(){
   manual[el.dataset.fg]=el.value;updateManual();
   $("fgCustomStatus").textContent="尚未儲存回報比較";
  }));
- $("fgSave").addEventListener("click",()=>{try{localStorage.setItem(storeKey,JSON.stringify(manual));$("fgCustomStatus").textContent="✅ 已儲存在這台瀏覽器";}catch(e){$("fgCustomStatus").textContent="儲存失敗："+e.message;}});
+ function saveManual(){try{localStorage.setItem(storeKey,JSON.stringify(manual));$("fgCustomStatus").textContent="✅ 已儲存自訂回報金額";}catch(e){$("fgCustomStatus").textContent="儲存失敗："+e.message;}}
+ $("fgSave").addEventListener("click",saveManual);
+ $("cmSave").addEventListener("click",saveManual);
  $("fgClear").addEventListener("click",()=>{if(!confirm("確定清空自訂免費遊戲回報金額？"))return;manual={buy:"",spin:""};$("fgCustomBuy").value="";$("fgCustomSpin").value="";updateManual();localStorage.removeItem(storeKey);$("fgCustomStatus").textContent="已清空";});
  if(typeof tmRender==="function"){const old=tmRender;tmRender=function(){const result=old.apply(this,arguments);real();return result;};real();}
 }
