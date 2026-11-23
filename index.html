@@ -513,6 +513,18 @@ body{background:#0b1116!important}
   </div>
   <p id="cmStatus" class="tm-note">目前資料只儲存在這台瀏覽器；若換電腦或清除瀏覽器資料，請使用 JSON 備份還原。</p>
  </div>
+ <div class="tm-panel fg-compare">
+<h3>🎰 免費遊戲回報金額比較｜自訂</h3>
+<p class="tm-note">這裡是自訂展示數據，並非真實遊戲紀錄。兩個回報金額可自行編輯，差額與倍數會即時計算。</p>
+<div class="tm-cards">
+<div class="tm-card"><small>購買免費遊戲｜回報總金額（點）</small><input id="fgCustomBuy" class="fg-input cm-value" data-fg="buy" type="number" min="0" step="any" placeholder="輸入回報總金額"></div>
+<div class="tm-card"><small>平轉進免費遊戲｜回報總金額（點）</small><input id="fgCustomSpin" class="fg-input cm-value" data-fg="spin" type="number" min="0" step="any" placeholder="輸入回報總金額"></div>
+<div class="tm-card"><small>回報差額（購買－平轉）</small><strong id="fgCustomDiff">—</strong></div>
+<div class="tm-card"><small>回報倍數（購買 ÷ 平轉）</small><strong id="fgCustomRatio">—</strong></div>
+</div>
+<div class="tm-filter"><button id="fgSave" type="button">💾 儲存回報金額</button><button id="fgClear" type="button">清空回報金額</button></div>
+<p id="fgCustomStatus" class="tm-note">此比較獨立儲存在這台瀏覽器，不會影響真實監測數據。</p>
+</div>
  <div id="cmCards" class="tm-cards"></div>
  <div class="tm-panel">
   <h3>📈 24 小時觀測紀錄分布｜自訂</h3>
@@ -539,18 +551,7 @@ body{background:#0b1116!important}
  <div class="tm-panel fg-compare">
 <h3>🎰 免費遊戲回報金額比較｜真實紀錄</h3>
 <p class="tm-note">比較「購買免費遊戲」與「平轉觸發免費遊戲」的回報金額；僅使用具備可辨識進入來源及回報金額的紀錄，不會把一般平轉當成免費遊戲。</p>
-<div class="tm-panel fg-compare">
-<h3>🎰 免費遊戲回報金額比較｜自訂</h3>
-<p class="tm-note">這裡是自訂展示數據，並非真實遊戲紀錄。兩個回報金額可自行編輯，差額與倍數會即時計算。</p>
-<div class="tm-cards">
-<div class="tm-card"><small>購買免費遊戲｜回報總金額（點）</small><input id="fgCustomBuy" class="fg-input cm-value" data-fg="buy" type="number" min="0" step="any" placeholder="輸入回報總金額"></div>
-<div class="tm-card"><small>平轉進免費遊戲｜回報總金額（點）</small><input id="fgCustomSpin" class="fg-input cm-value" data-fg="spin" type="number" min="0" step="any" placeholder="輸入回報總金額"></div>
-<div class="tm-card"><small>回報差額（購買－平轉）</small><strong id="fgCustomDiff">—</strong></div>
-<div class="tm-card"><small>回報倍數（購買 ÷ 平轉）</small><strong id="fgCustomRatio">—</strong></div>
-</div>
-<div class="tm-filter"><button id="fgSave" type="button">💾 儲存回報金額</button><button id="fgClear" type="button">清空回報金額</button></div>
-<p id="fgCustomStatus" class="tm-note">此比較獨立儲存在這台瀏覽器，不會影響真實監測數據。</p>
-</div>
+
 <div class="tm-cards">
 <div class="tm-card"><small>購買免費遊戲｜回報總金額（點）</small><strong id="fgRealBuy">—</strong><span id="fgRealBuyCount" class="tm-note">0 筆</span></div>
 <div class="tm-card"><small>平轉進免費遊戲｜回報總金額（點）</small><strong id="fgRealSpin">—</strong><span id="fgRealSpinCount" class="tm-note">0 筆</span></div>
