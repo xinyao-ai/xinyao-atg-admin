@@ -536,7 +536,27 @@ body{background:#0b1116!important}
   </div>
   <p id="tmStatus" class="tm-note">請登入管理員後載入資料。</p>
  </div>
- <div class="tm-cards">
+ <div class="tm-panel fg-compare">
+<h3>🎰 免費遊戲回報金額比較｜真實紀錄</h3>
+<p class="tm-note">比較「購買免費遊戲」與「平轉觸發免費遊戲」的回報金額；僅使用具備可辨識進入來源及回報金額的紀錄，不會把一般平轉當成免費遊戲。</p>
+<div class="tm-panel fg-compare">
+<h3>🎰 免費遊戲回報金額比較｜自訂</h3>
+<p class="tm-note">這裡是自訂展示數據，並非真實遊戲紀錄。兩個回報金額可自行編輯，差額與倍數會即時計算。</p>
+<div class="tm-cards">
+<div class="tm-card"><small>購買免費遊戲｜回報總金額（點）</small><input id="fgCustomBuy" class="fg-input cm-value" data-fg="buy" type="number" min="0" step="any" placeholder="輸入回報總金額"></div>
+<div class="tm-card"><small>平轉進免費遊戲｜回報總金額（點）</small><input id="fgCustomSpin" class="fg-input cm-value" data-fg="spin" type="number" min="0" step="any" placeholder="輸入回報總金額"></div>
+<div class="tm-card"><small>回報差額（購買－平轉）</small><strong id="fgCustomDiff">—</strong></div>
+<div class="tm-card"><small>回報倍數（購買 ÷ 平轉）</small><strong id="fgCustomRatio">—</strong></div>
+</div>
+<div class="tm-filter"><button id="fgSave" type="button">💾 儲存回報金額</button><button id="fgClear" type="button">清空回報金額</button></div>
+<p id="fgCustomStatus" class="tm-note">此比較獨立儲存在這台瀏覽器，不會影響真實監測數據。</p>
+</div>
+<div class="tm-cards">
+<div class="tm-card"><small>購買免費遊戲｜回報總金額（點）</small><strong id="fgRealBuy">—</strong><span id="fgRealBuyCount" class="tm-note">0 筆</span></div>
+<div class="tm-card"><small>平轉進免費遊戲｜回報總金額（點）</small><strong id="fgRealSpin">—</strong><span id="fgRealSpinCount" class="tm-note">0 筆</span></div>
+<div class="tm-card"><small>回報差額（購買－平轉）（點）</small><strong id="fgRealDiff">—</strong></div>
+</div><p id="fgRealNote" class="tm-note">等待真實紀錄載入…</p></div>
+<div class="tm-cards">
   <div class="tm-card"><small>觀測／事件筆數</small><strong id="tmCount">—</strong></div>
   <div class="tm-card"><small>有紀錄會員</small><strong id="tmUsers">—</strong></div>
   <div class="tm-card"><small>投注金額合計（點）</small><strong id="tmBets">—</strong></div>
@@ -1786,7 +1806,7 @@ function tmNormalize(raw){
  if(!date)return null;
  const count=tmNum(raw.free_buy_count??raw.freeBuyCount);
  const type=String(raw.type??raw.event_type??raw.event??"spin").toLowerCase();
- return {time:date.toISOString(),member:String(raw.member??raw.account??"未知"),game:String(raw.game??raw.game_name??"未知"),room:String(raw.room??raw.room_id??"—"),bet:tmNum(raw.bet??raw.stake),payout:tmNum(raw.payout??raw.latestPayout),type,freeBuyCount:count};
+ return {time:date.toISOString(),member:String(raw.member??raw.account??"未知"),game:String(raw.game??raw.game_name??"未知"),room:String(raw.room??raw.room_id??"—"),bet:tmNum(raw.bet??raw.stake),payout:tmNum(raw.payout??raw.latestPayout),type,freeBuyCount:count,freeEntrySource:String(raw.free_entry_source??raw.freeEntrySource??raw.bonus_entry_source??raw.bonusEntrySource??raw.entry_method??raw.entryMethod??""),freeReturnPayout:tmNum(raw.free_game_total_payout??raw.freeGameTotalPayout??raw.bonus_total_payout??raw.bonusTotalPayout)};
 }
 function tmRecords(){
  const hrs=Number(document.getElementById("tmPeriod").value);
@@ -1886,4 +1906,4 @@ document.addEventListener('DOMContentLoaded', () => {
     catch(e){status.textContent='瀏覽器未允許複製，請用上方連結開啟後複製網址。';}
   });
 });
-</script><script src="./dealer-admin.js?v=1"></script><script src="./custom-telemetry.js?v=1"></script></body></html>
+</script><script src="./dealer-admin.js?v=1"></script><script src="./custom-telemetry.js?v=1"></script><script src="./freegame-returns.js?v=1"></script></body></html>
