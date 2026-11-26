@@ -22,8 +22,9 @@ function preview(url){
 async function load(){
  message('正在讀取設定…');
  try{
-  const file=await api('launch-popup-config.json?ref=main');
-  current=JSON.parse(un64(file.content));
+  const file=await api('carousel-config.json?ref=main');
+  const settings=JSON.parse(un64(file.content));
+  current=settings.popup||{enabled:true,imageOnly:true,title:'歡迎使用賽特神諭',description:'最新活動與功能資訊，請留意官方公告。',image:'',link:'',buttonText:'查看詳情'};
   $('spEnabled').checked=current.enabled!==false;
   $('spImageOnly').checked=current.imageOnly!==false;
   $('spLink').value=current.link||'';$('spButtonText').value=current.buttonText||'查看詳情';
@@ -47,8 +48,9 @@ const file64=blob=>new Promise((resolve,reject)=>{const r=new FileReader();r.onl
 async function publish(){
  if(busy)return;busy=true;$('spSave').disabled=true;
  try{
-  const latest=await api('launch-popup-config.json?ref=main');
-  const cfg=JSON.parse(un64(latest.content)),link=$('spLink').value.trim();
+  const latest=await api('carousel-config.json?ref=main');
+  const master=JSON.parse(un64(latest.content));
+  const cfg={...(master.popup||{})},link=$('spLink').value.trim();
   if(link&&!/^https:\/\//i.test(link))throw Error('活動連結請使用 https:// 網址');
   cfg.enabled=$('spEnabled').checked;cfg.imageOnly=$('spImageOnly').checked;
   cfg.link=link;cfg.buttonText=$('spButtonText').value.trim()||'查看詳情';
@@ -57,12 +59,13 @@ async function publish(){
   else if(pending){
    if(pending.size>6*1024*1024)throw Error('圖片壓縮後仍超過 6MB');
    message('上傳圖片中…');
-   const filename='assets/popup/launch-'+Date.now()+'.webp';
+   const filename='assets/carousel/popup-'+Date.now()+'.webp';
    await api(filename,'PUT',{branch:'main',message:'Upload popup announcement poster',content:await file64(pending)});
    cfg.image='./'+filename;
   }
   message('發布設定中…');
-  await api('launch-popup-config.json','PUT',{branch:'main',sha:latest.sha,message:'Publish SethOracle popup from ATG admin',content:b64(JSON.stringify(cfg,null,2)+'\n')});
+  master.popup=cfg;
+  await api('carousel-config.json','PUT',{branch:'main',sha:latest.sha,message:'Publish SethOracle popup via approved carousel configuration',content:b64(JSON.stringify(master,null,2)+'\n')});
   pending=null;$('spFile').value='';current=cfg;
   message('✅ 已發布！GitHub Pages 部署完成後重新開啟 APP 可看到新彈窗。');
  }catch(e){message('❌ '+e.message)}finally{busy=false;$('spSave').disabled=false}
