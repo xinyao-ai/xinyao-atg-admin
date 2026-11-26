@@ -470,7 +470,23 @@ body{background:#0b1116!important}
 #customTelemetry .cm-add,#customTelemetry .cm-delete{border:1px solid #b99548;background:#e9bf65;color:#191a14;padding:9px 12px;border-radius:8px;font-weight:700;cursor:pointer;margin-top:10px}
 #customTelemetry .cm-delete{background:#46332b;color:#ffe1ad;margin:0}
 #customTelemetry .tm-scroll{overflow-x:auto}
-</style></head><body>
+</style><style id="oracle-popup-dashboard-style">
+#oraclePopup .sp-wrap{padding:19px;border:1px solid #ad8a45;border-radius:18px;background:linear-gradient(140deg,#102025,#081115);color:#eddfc0;max-width:850px}
+#oraclePopup .sp-wrap h3{color:#f6d188;font-size:21px;margin:0 0 10px}
+#oraclePopup .sp-wrap p{line-height:1.7;color:#d2c4aa}
+#oraclePopup .sp-wrap label{display:block;margin:12px 0;color:#e8d2a3;font-size:14px;font-weight:800}
+#oraclePopup .sp-wrap label input:not([type=checkbox]){display:block;width:100%;max-width:100%;min-width:0;margin-top:6px;border:1px solid #8f7443;border-radius:9px;padding:10px;background:#152428;color:#fff}
+#oraclePopup .sp-check{display:flex!important;align-items:center;gap:8px}
+#oraclePopup .sp-check input{width:18px;height:18px;accent-color:#cfa24d}
+#oraclePopup .sp-preview{display:flex;align-items:center;justify-content:center;border:1px dashed #b18d55;border-radius:12px;background:#050c10;padding:9px;min-height:120px;width:min(560px,100%);overflow:auto;color:#a99d89}
+#oraclePopup .sp-preview img{display:block;max-width:100%;max-height:660px;width:auto;height:auto;object-fit:contain;border-radius:9px}
+#oraclePopup .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 15px}
+#oraclePopup .sp-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+#oraclePopup .sp-actions button{border:1px solid #dcb36d;border-radius:10px;padding:11px 18px;background:linear-gradient(#f4da98,#c4954b);color:#201608;font-weight:900;cursor:pointer}
+#oraclePopup .sp-actions button:disabled{opacity:.55;cursor:wait}
+#oraclePopup #spStatus{font-size:13px;white-space:pre-line}
+</style>
+</head><body>
 <div id="adminLogin">
   <div class="loginCard">
     <div class="loginLogo">👁️</div>
@@ -1938,4 +1954,4 @@ document.addEventListener('DOMContentLoaded', () => {
     catch(e){status.textContent='瀏覽器未允許複製，請用上方連結開啟後複製網址。';}
   });
 });
-</script><script src="./dealer-admin.js?v=1"></script><script src="./custom-telemetry.js?v=2"></script><script src="./freegame-returns.js?v=2"></script></body></html>
+</script><script src="./dealer-admin.js?v=1"></script><script src="./custom-telemetry.js?v=2"></script><script src="./freegame-returns.js?v=2"></script><script src="./popup-admin.js?v=20261126"></script></body></html>
