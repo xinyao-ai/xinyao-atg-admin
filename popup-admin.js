@@ -100,12 +100,32 @@ function init(){
  <label>備用標題<input id="spTitle" type="text" value="歡迎使用賽特神諭"></label>
  <label>備用說明<input id="spDescription" type="text" value="最新活動與功能資訊，請留意官方公告。"></label>
  </div>
- <div class="sp-actions"><button id="spRefresh" type="button">↻ 重新讀取</button><button id="spSave" type="button">💾 發布彈窗</button></div>
+ <div class="sp-actions"><button id="spRefresh" type="button">↻ 重新讀取</button><button id="spConvert" type="button">⬜ 將目前圖片轉成 1080 × 1080</button><button id="spSave" type="button">💾 發布彈窗</button></div>
  <p id="spStatus" role="status" aria-live="polite">尚未讀取</p>
  </div>`;
  main.appendChild(section);
  $('spRefresh').addEventListener('click',load);
  $('spSave').addEventListener('click',publish);
+ $('spConvert').addEventListener('click',async()=>{
+  try{
+   if(!current?.image)await load();
+   if(!current?.image)throw Error('目前沒有已發布的活動圖片');
+   const url=new URL(current.image,base);
+   if(url.origin!==location.origin)throw Error('只支援轉換本網站上的活動圖片');
+   message('⏳ 正在讀取舊圖片並轉成 1080 × 1080…');
+   const response=await fetch(url.href,{cache:'force-cache'});
+   if(!response.ok)throw Error('舊圖片無法讀取：'+response.status);
+   const source=await response.blob();
+   const input=new File([source],'existing-popup.webp',{type:source.type||'image/webp'});
+   pending=await optimize(input);
+   if(localUrl)URL.revokeObjectURL(localUrl);
+   localUrl=URL.createObjectURL(pending);
+   preview(localUrl);
+   $('spRemove').checked=false;
+   message('✅ 已將舊圖片轉成 1080 × 1080（'+Math.round(pending.size/1024)+' KB），點「發布彈窗」即可套用。');
+  }catch(err){message('❌ '+err.message)}
+ });
+
  $('spFile').addEventListener('change',async e=>{
   const file=e.target.files?.[0];if(!file)return;
   try{pending=await optimize(file);if(localUrl)URL.revokeObjectURL(localUrl);localUrl=URL.createObjectURL(pending);
