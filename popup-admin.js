@@ -38,11 +38,20 @@ async function optimize(file){
  if(!/^image\/(png|jpeg|webp)$/.test(file.type))throw Error('只接受 PNG、JPG、WebP 圖片');
  if(file.size>20*1024*1024)throw Error('圖片超過 20MB');
  const bit=await createImageBitmap(file);
- const scale=Math.min(1,1440/bit.width,1800/bit.height);
+ // Always generate a genuine 1080 x 1080 image, even for portrait originals.
+ // Keep the entire poster visible: center it on the same black background as the modal.
  const canvas=document.createElement('canvas');
- canvas.width=Math.round(bit.width*scale);canvas.height=Math.round(bit.height*scale);
- canvas.getContext('2d').drawImage(bit,0,0,canvas.width,canvas.height);bit.close?.();
- return await new Promise((resolve,reject)=>canvas.toBlob(x=>x?resolve(x):reject(Error('圖片壓縮失敗')),'image/webp',.84));
+ canvas.width=1080;canvas.height=1080;
+ const ctx=canvas.getContext('2d');
+ ctx.fillStyle='#0a1014';ctx.fillRect(0,0,1080,1080);
+ const scale=Math.min(1080/bit.width,1080/bit.height);
+ const width=Math.round(bit.width*scale),height=Math.round(bit.height*scale);
+ ctx.drawImage(bit,Math.round((1080-width)/2),Math.round((1080-height)/2),width,height);
+ bit.close?.();
+ const encode=quality=>new Promise((resolve,reject)=>canvas.toBlob(x=>x?resolve(x):reject(Error('圖片壓縮失敗')),'image/webp',quality));
+ let blob=await encode(.8);
+ for(const quality of [.72,.64,.56]){if(blob.size<=300*1024)break;blob=await encode(quality)}
+ return blob;
 }
 const file64=blob=>new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=()=>reject(Error('圖片讀取失敗'));r.readAsDataURL(blob)});
 async function publish(){
@@ -78,8 +87,8 @@ function init(){
  if(carousel)carousel.insertAdjacentElement('afterend',tab);else nav.appendChild(tab);
  const section=document.createElement('section');section.className='panel';section.id='oraclePopup';
  section.innerHTML=`<div class="sp-wrap"><h3>📢 賽特神諭｜彈窗管理</h3>
- <p>會員每次重新開啟程式就會看到公告。正方形彈窗，圖片完整顯示、不裁切。</p>
- <p>建議圖片尺寸：<b>1122 × 1122</b>（JPG / PNG / WebP，會自動壓縮）。</p>
+ <p>會員每次重新開啟程式就會看到公告。彈窗採 1:1 正方形；上傳後自動轉成 1080 × 1080，原圖完整保留、不裁切。</p>
+ <p>建議圖片尺寸：<b>1080 × 1080</b>（JPG / PNG / WebP，會自動壓縮）。</p>
  <label class="sp-check"><input id="spEnabled" type="checkbox" checked> 啟用彈窗</label>
  <label class="sp-check"><input id="spImageOnly" type="checkbox" checked> 正方形圖片模式（隱藏額外標題文字）</label>
  <label>上傳活動海報<input id="spFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
