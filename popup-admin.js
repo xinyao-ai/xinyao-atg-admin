@@ -78,10 +78,10 @@ function init(){
  if(carousel)carousel.insertAdjacentElement('afterend',tab);else nav.appendChild(tab);
  const section=document.createElement('section');section.className='panel';section.id='oraclePopup';
  section.innerHTML=`<div class="sp-wrap"><h3>📢 賽特神諭｜彈窗管理</h3>
- <p>會員每次重新開啟程式就會看到公告。海報完整呈現、不裁切。</p>
- <p>建議圖片尺寸：<b>1122 × 1402</b>（JPG / PNG / WebP，會自動壓縮）。</p>
+ <p>會員每次重新開啟程式就會看到公告。正方形彈窗，圖片完整顯示、不裁切。</p>
+ <p>建議圖片尺寸：<b>1122 × 1122</b>（JPG / PNG / WebP，會自動壓縮）。</p>
  <label class="sp-check"><input id="spEnabled" type="checkbox" checked> 啟用彈窗</label>
- <label class="sp-check"><input id="spImageOnly" type="checkbox" checked> 海報模式（隱藏額外標題文字）</label>
+ <label class="sp-check"><input id="spImageOnly" type="checkbox" checked> 正方形圖片模式（隱藏額外標題文字）</label>
  <label>上傳活動海報<input id="spFile" type="file" accept="image/png,image/jpeg,image/webp"></label>
  <div id="spPreview" class="sp-preview">尚未設定圖片</div>
  <label class="sp-check"><input id="spRemove" type="checkbox"> 移除圖片</label>
